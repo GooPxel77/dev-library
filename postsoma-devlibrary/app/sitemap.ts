@@ -8,19 +8,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticRoutes: MetadataRoute.Sitemap = [
     {
       url: absoluteSiteUrl("/"),
-      lastModified: new Date(),
       changeFrequency: "daily",
       priority: 1.0,
     },
     {
       url: absoluteSiteUrl("/resources"),
-      lastModified: new Date(),
       changeFrequency: "daily",
       priority: 0.9,
     },
     {
       url: absoluteSiteUrl("/recommend"),
-      lastModified: new Date(),
       changeFrequency: "daily",
       priority: 0.9,
     },
@@ -33,7 +30,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   );
 
   const resourceRoutes = featuredResources.map((resource) => {
-    let lastModified = new Date();
+    let lastModified: Date | undefined;
     if (resource.updatedAt) {
       const parsedDate = new Date(resource.updatedAt);
       if (!isNaN(parsedDate.getTime())) {

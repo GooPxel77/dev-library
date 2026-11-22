@@ -7,6 +7,8 @@ import Icon from "@/components/ui/Icon";
 import HeroSearch from "@/components/home/HeroSearch";
 import { absoluteSiteUrl, SITE_HOSTNAME } from "@/lib/config/site";
 import type { Metadata } from "next";
+import { selectHomeCurations } from "@/lib/utils/home-curations";
+import curatedSurpriseData from "@/data/curated-surprise.json";
 
 export const metadata: Metadata = {
   alternates: {
@@ -117,8 +119,10 @@ export default async function HomePage() {
   const total   = manifest?.total ?? 0;
 
   // Prune resources for dynamic curations sampling (excluding offensive ones)
-  const prunedResources = allResources
-    .filter(r => !isOffensiveResource(r))
+  const prunedResources = selectHomeCurations(
+    allResources.filter(r => !isOffensiveResource(r)),
+    new Set(curatedSurpriseData.map(item => item.resourceId)),
+  )
     .map((r) => ({
       id: r.id,
       title: r.title,

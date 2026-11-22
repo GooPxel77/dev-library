@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import Icon from "@/components/ui/Icon";
 import { TYPE_LABELS } from "@/lib/utils/resource";
@@ -70,15 +70,7 @@ const INTENT_ORDER: IntentKey[] = [
   "surprise",
 ];
 
-export default function RandomCurations({ resources }: RandomCurationsProps) {
-  const [cards, setCards] = useState<IntentCardState[]>([]);
-  const [rotate, setRotate] = useState(false);
-
-  const shuffle = useCallback(() => {
-    if (resources.length === 0) return;
-
-    setRotate((prev) => !prev);
-
+function drawCards(resources: CuratedResourceItem[], random: () => number): IntentCardState[] {
     // Group resources into intent pools
     const pools: Record<"read" | "build" | "practice" | "reference", CuratedResourceItem[]> = {
       read: [],
@@ -115,9 +107,9 @@ export default function RandomCurations({ resources }: RandomCurationsProps) {
       const chosen =
         nonDuplicateDomainCandidates.length > 0
           ? nonDuplicateDomainCandidates[
-              Math.floor(Math.random() * nonDuplicateDomainCandidates.length)
+              Math.floor(random() * nonDuplicateDomainCandidates.length)
             ]
-          : candidates[Math.floor(Math.random() * candidates.length)];
+          : candidates[Math.floor(random() * candidates.length)];
 
       selectedIds.add(chosen.id);
       if (chosen.sourceDomain) {
@@ -167,12 +159,17 @@ export default function RandomCurations({ resources }: RandomCurationsProps) {
       };
     });
 
-    setCards(nextCards);
-  }, [resources]);
+    return nextCards;
+}
 
-  useEffect(() => {
-    shuffle();
-  }, [shuffle]);
+export default function RandomCurations({ resources }: RandomCurationsProps) {
+  // Identical initial selection on server and browser, with links in static HTML.
+  const [cards, setCards] = useState(() => drawCards(resources, () => 0));
+  const [rotate, setRotate] = useState(false);
+  const shuffle = () => {
+    setCards(drawCards(resources, Math.random));
+    setRotate(prev => !prev);
+  };
 
   if (cards.length === 0) return null;
 

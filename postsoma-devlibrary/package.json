@@ -6,6 +6,7 @@
     "dev": "next dev",
     "prebuild": "npm run github:validate-curation",
     "build": "next build",
+    "postbuild": "node scripts/copy-sitemap-alias.mjs",
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
