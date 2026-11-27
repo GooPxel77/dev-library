@@ -7,7 +7,7 @@
   "preview_urls": false,
   "vars": {
     "SITE_ORIGIN": "https://www.205022.xyz",
-    "MODEL": "@cf/meta/llama-3.1-8b-instruct-fp8-fast"
+    "MODEL": "@cf/meta/llama-3.3-70b-instruct-fp8-fast"
   },
   "ai": { "binding": "AI" },
   "durable_objects": {

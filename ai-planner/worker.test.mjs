@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { after, test } from "node:test";
 import { fileURLToPath } from "node:url";
+import { readFile } from "node:fs/promises";
 import { Miniflare } from "miniflare";
 
 const origin = "https://www.205022.xyz";
@@ -58,4 +59,47 @@ test("rejected input and preflight do not spend a slot; attempted model calls do
   assert.equal((await failed.json()).remaining, 9);
   const success = await post(ip);
   assert.equal((await success.json()).remaining, 8);
+});
+
+test("a full counter from yesterday allows today's first Workers AI call", async () => {
+  const source = await readFile(new URL("./worker.mjs", import.meta.url), "utf8");
+  const model = "@cf/meta/llama-3.3-70b-instruct-fp8-fast";
+  const local = new Miniflare({
+    compatibilityDate: "2026-03-01",
+    modules: [
+      { type: "ESModule", path: "fixture.mjs", contents: `
+        import planner, { DailyQuota } from "./worker.mjs";
+        export class FixtureQuota extends DailyQuota {
+          expireDay() { this.ctx.storage.sql.exec("UPDATE quota SET reset = 0"); }
+        }
+        export default {
+          async fetch(request, env) {
+            if (new URL(request.url).pathname === "/advance-day") {
+              const counter = env.QUOTAS.get(env.QUOTAS.idFromName("192.0.2.9"));
+              await counter.expireDay();
+              return new Response(null);
+            }
+            const AI = { run: async (id, input) => ({ response: id + "/" + input.messages.length }) };
+            return planner.fetch(request, { ...env, AI });
+          }
+        };` },
+      { type: "ESModule", path: "worker.mjs", contents: source },
+    ],
+    durableObjects: { QUOTAS: { className: "FixtureQuota", useSQLite: true } },
+    bindings: { SITE_ORIGIN: origin, MODEL: model },
+  });
+  const call = () => local.dispatchFetch("https://planner.test/plan", {
+    method: "POST", headers: { Origin: origin, "CF-Connecting-IP": "192.0.2.9", "Content-Type": "application/json" },
+    body: JSON.stringify(criteria),
+  });
+  try {
+    for (let i = 0; i < 10; i++) assert.equal((await call()).status, 200);
+    assert.equal((await call()).status, 429);
+    await local.dispatchFetch("https://planner.test/advance-day");
+    const { remaining, plan } = await (await call()).json();
+    assert.equal(remaining, 9);
+    assert.equal(plan, `${model}/2`);
+  } finally {
+    await local.dispose();
+  }
 });
