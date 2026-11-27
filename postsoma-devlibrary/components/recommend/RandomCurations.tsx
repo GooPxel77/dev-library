@@ -194,7 +194,7 @@ export default function RandomCurations({ resources }: RandomCurationsProps) {
             </div>
             {resource ? (
               <>
-                <Link href={`/resource/${resource.id}`} className="font-display text-base leading-snug text-archive-text hover:text-archive-accent underline-offset-4 hover:underline break-words">
+                <Link prefetch={false} href={`/resource/${resource.id}`} className="font-display text-base leading-snug text-archive-text hover:text-archive-accent underline-offset-4 hover:underline break-words">
                   {resource.title}
                 </Link>
                 <p className="mt-2 text-xs text-archive-subtle leading-relaxed break-words">

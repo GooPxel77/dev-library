@@ -47,7 +47,7 @@ export default function ResourceCard<T extends CardData>({ resource, onPreview, 
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <h2 lang={displayLanguage === "zh" ? "zh" : "en"} className="font-display text-base text-archive-text leading-snug break-words">
-            <Link href={detailUrl} onClick={openDetails} className="after:absolute after:inset-0 hover:text-archive-accent focus-visible:text-archive-accent">
+            <Link prefetch={false} href={detailUrl} onClick={openDetails} className="after:absolute after:inset-0 hover:text-archive-accent focus-visible:text-archive-accent">
               {resource.title}
             </Link>
           </h2>
@@ -65,7 +65,7 @@ export default function ResourceCard<T extends CardData>({ resource, onPreview, 
         <div className="relative z-10 shrink-0"><BookmarkButton resourceId={resource.id} resourceTitle={resource.title} variant="icon" /></div>
       </div>
       <div className="relative z-10 mt-4 pt-3 border-t border-archive-border/50 flex flex-wrap items-center justify-between gap-3 text-xs">
-        <Link href={detailUrl} onClick={openDetails} className="text-archive-text hover:text-archive-accent">查看详情 →</Link>
+        <Link prefetch={false} href={detailUrl} onClick={openDetails} className="text-archive-text hover:text-archive-accent">查看详情 →</Link>
         <a href={resource.url} target="_blank" rel="noopener noreferrer" className="text-archive-subtle hover:text-archive-accent" aria-label={`访问${resource.title}原站（在新标签页打开）`}>
           访问原站 ↗
         </a>

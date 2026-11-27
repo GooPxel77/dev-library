@@ -216,6 +216,7 @@ export default function RecommendClient({ presets, plannerEnabled = hasHostedPla
             return (
               <Link
                 key={preset.id}
+                prefetch={false}
                 href={presetLink}
                 onClick={(event) => {
                   scrollToResults.current = true;
@@ -428,6 +429,7 @@ export default function RecommendClient({ presets, plannerEnabled = hasHostedPla
                       {/* Footer actions: Single primary CTA + quiet secondary link */}
                       <div className="flex items-center gap-3 justify-end pt-2 border-t border-archive-border/40 flex-wrap">
                         <Link
+                          prefetch={false}
                           href={`/resource/${pick.resourceId}?${detailParams}`}
                           className="text-sm text-archive-subtle hover:text-archive-text transition-colors"
                         >

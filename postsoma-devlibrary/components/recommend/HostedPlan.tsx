@@ -108,7 +108,7 @@ export function HostedPlan({ report, changed }: { report: Report; changed: boole
           const domain = resource.domain || getResourceDomain(resource.url);
           const meta = [typeLabel, langLabel, domain].filter(Boolean).join(" · ");
           return <li key={resource.id} className="space-y-1">
-            <Link href={`/resource/${encodeURIComponent(resource.id)}?from=ai&ai=${report.id}`} className="text-archive-accent underline underline-offset-4">{resource.title}</Link>
+            <Link prefetch={false} href={`/resource/${encodeURIComponent(resource.id)}?from=ai&ai=${report.id}`} className="text-archive-accent underline underline-offset-4">{resource.title}</Link>
             {meta && <p className="text-xs text-archive-subtle">{meta}</p>}
             <p className="text-sm leading-relaxed text-archive-text"><strong>{resource.fit === "direct" ? "直接匹配" : "延伸阅读"} · </strong>{resource.reason}</p>
             {resource.url && <a href={resource.url} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-10 items-center text-sm text-archive-accent underline">访问原站 ↗</a>}
@@ -119,7 +119,7 @@ export function HostedPlan({ report, changed }: { report: Report; changed: boole
         <h3 className="font-semibold">GitHub 实作项目</h3>
         {report.projects.length === 0 && <p className="text-sm text-archive-subtle">本次没有找到与任务足够相关的收藏项目。</p>}
         {report.projects.map(project => <div key={project.id} className="space-y-1">
-          <Link href={`/resource/${encodeURIComponent(project.id)}?from=ai&ai=${report.id}`} className="text-archive-accent underline underline-offset-4">{project.title}</Link>
+          <Link prefetch={false} href={`/resource/${encodeURIComponent(project.id)}?from=ai&ai=${report.id}`} className="text-archive-accent underline underline-offset-4">{project.title}</Link>
           <p className="text-sm leading-relaxed"><strong>{project.use === "apply" ? "尝试应用" : "参考实现"} · </strong>{project.reason}</p>
           <p className="text-sm leading-relaxed">第一步：{project.step}</p>
           <a href={project.url} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center text-sm text-archive-accent underline">打开 GitHub 仓库 ↗</a>

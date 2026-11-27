@@ -17,5 +17,9 @@ export async function GET(_request: Request, { params }: { params: { shard: stri
       type: r.facet?.resourceType ?? r.type,
       language: r.facet?.language ?? r.language,
     }));
-  return Response.json(cards);
+  return Response.json(cards, {
+    headers: {
+      "Cache-Control": "public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800",
+    },
+  });
 }

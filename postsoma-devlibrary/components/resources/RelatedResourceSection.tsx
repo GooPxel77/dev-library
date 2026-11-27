@@ -38,6 +38,7 @@ export default function RelatedResourceSection({
         {items.map(({ resource, note }) => (
           <Link
             key={resource.id}
+            prefetch={false}
             href={`/resource/${resource.id}?col=${resource.collection}`}
             className="group rounded-sm border border-archive-border/70 bg-archive-bg/45 p-3 transition-colors hover:border-teal-500/35 hover:bg-teal-500/[0.035]"
           >
