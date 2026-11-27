@@ -11,7 +11,7 @@ export default function AppShell({
   showMascot?: boolean;
 }) {
   return (
-    <div className="min-h-screen flex flex-col overflow-x-hidden w-full">
+    <div data-app-shell className="min-h-screen flex flex-col overflow-x-clip w-full">
       <AppHeader />
       <main className="flex-1 max-w-7xl mx-auto w-full px-4 py-6 pb-24 md:px-6 md:py-8 md:pb-8">
         {children}

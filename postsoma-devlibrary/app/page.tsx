@@ -201,14 +201,14 @@ export default async function HomePage() {
 
       <section className="pt-10 pb-12 md:pt-16 md:pb-16">
         <h1 className="font-display text-4xl md:text-5xl text-archive-text leading-tight mb-4 max-w-2xl">
-          Find one good place to begin.
+          找到适合你的编程学习资源
         </h1>
         <p className="font-sans text-base text-archive-subtle max-w-2xl leading-relaxed">
           在 {allResources.length.toLocaleString()} 项免费编程资源中，找到适合你的书籍、课程、文档和开源项目。
         </p>
         <HeroSearch totalCount={allResources.length} />
         <div className="mt-5 flex flex-wrap items-center gap-x-6 gap-y-3 text-sm">
-          <Link href="/resources" id="hero-browse-btn" className="text-archive-text hover:text-archive-accent underline underline-offset-4 decoration-archive-muted">
+          <Link prefetch={false} href="/resources" id="hero-browse-btn" className="text-archive-text hover:text-archive-accent underline underline-offset-4 decoration-archive-muted">
             浏览全部资源 <span aria-hidden="true">→</span>
           </Link>
           <Link href="/recommend" id="hero-recommend-btn" className="text-archive-subtle hover:text-archive-accent underline underline-offset-4 decoration-archive-muted">

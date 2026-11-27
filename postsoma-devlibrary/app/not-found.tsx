@@ -14,7 +14,7 @@ export default function NotFound() {
         <p className="font-sans text-sm text-archive-subtle leading-relaxed">
           该资源或页面可能已被移除，试试返回资源库搜索。
         </p>
-        <Link href="/resources" className="btn-accent px-6 py-2.5 text-xs font-mono">
+        <Link prefetch={false} href="/resources" className="btn-accent px-6 py-2.5 text-xs font-mono">
           ← 返回资源库
         </Link>
       </div>

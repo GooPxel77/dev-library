@@ -8,7 +8,6 @@ import type {
   CanonicalTopicId,
   Resource,
   ResourceLanguage,
-  ResourceTocNode,
   ResourceType,
 } from "@/lib/types/resource";
 import type {
@@ -50,15 +49,6 @@ import {
 } from "./GitHubFavoriteMeta";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function doesTocPathExist(nodes: ResourceTocNode[], targetPath: string[]): boolean {
-  if (!targetPath || targetPath.length === 0) return true;
-  for (const node of nodes) {
-    if (node.path.join(":") === targetPath.join(":")) return true;
-    if (node.children && doesTocPathExist(node.children, targetPath)) return true;
-  }
-  return false;
-}
 
 const RESOURCE_TYPE_VALUES: ResourceType[] = [
   "book",
@@ -108,7 +98,6 @@ function readMultiValueParam(
 
 interface ResourceExplorerProps {
   resources: Resource[];
-  tocNodes: Record<string, Record<string, ResourceTocNode[]>>;
   collections: { id: string; label: string; count: number }[];
   githubFavorites: GitHubFavorite[];
 }
@@ -150,7 +139,7 @@ function GitHubFilterPill({
 }) {
   return (
     <div className="inline-flex items-center gap-1.5 rounded-full border border-teal-500/20 bg-teal-500/8 px-3 py-1 text-xs animate-fade-in">
-      <span className="font-mono text-[10px] text-archive-subtle">
+      <span className="font-mono text-[11px] text-archive-subtle">
         {label}:
       </span>
       <span className="font-sans font-medium text-teal-300">{value}</span>
@@ -177,7 +166,7 @@ function PublicFilterPill({
 }) {
   return (
     <div className="inline-flex items-center gap-1.5 rounded-full border border-archive-border/60 bg-archive-surface/80 px-3 py-1 text-xs animate-fade-in">
-      <span className="font-mono text-[9px] uppercase tracking-wider text-archive-subtle/60">
+      <span className="font-mono text-[11px] uppercase tracking-wider text-archive-subtle">
         {label}
       </span>
       <span className="max-w-[180px] truncate font-sans font-medium text-archive-text">
@@ -217,7 +206,7 @@ function CollectionTab({
       }`}
     >
       {collection.label}
-      <span className="ml-2 font-mono text-[10px] opacity-55 tabular-nums">
+      <span className="ml-2 font-mono text-[11px] tabular-nums">
         {collection.count.toLocaleString()}
       </span>
     </button>
@@ -228,7 +217,6 @@ function CollectionTab({
 
 export default function ResourceExplorer({
   resources,
-  tocNodes,
   collections,
   githubFavorites,
 }: ResourceExplorerProps) {
@@ -259,6 +247,24 @@ export default function ResourceExplorer({
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
   const closeFilterDrawer = useCallback(() => setIsFilterDrawerOpen(false), []);
   const closeResourceDrawer = useCallback(() => setPreviewResource(null), []);
+  const collectionStrip = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const strip = collectionStrip.current;
+    if (!strip) return;
+    const revealSelection = () => {
+      const tab = strip.querySelector<HTMLElement>('[aria-pressed="true"]');
+      if (!tab) return;
+      const bounds = strip.getBoundingClientRect();
+      const active = tab.getBoundingClientRect();
+      if (active.left < bounds.left) strip.scrollLeft += active.left - bounds.left;
+      else if (active.right > bounds.right) strip.scrollLeft += active.right - bounds.right;
+    };
+    revealSelection();
+    const observer = new ResizeObserver(revealSelection);
+    observer.observe(strip);
+    return () => observer.disconnect();
+  }, [selectedCollection]);
+
   const [, startTransition] = useTransition();
   const showPublicFacets = selectedCollection !== "github";
 
@@ -548,27 +554,15 @@ export default function ResourceExplorer({
     [],
   );
 
-  // ── Reactive TOC data: always current for (collection, language) ───────────
-  const tocAllLangs = useMemo(() => {
-    const collectionToc = tocNodes[selectedCollection] ?? {};
-    return {
-      zh: (collectionToc["zh"] ?? []) as ResourceTocNode[],
-      en: (collectionToc["en"] ?? []) as ResourceTocNode[],
-      all: (collectionToc["all"] ?? []) as ResourceTocNode[],
-    };
-  }, [tocNodes, selectedCollection]);
-
-  // Flatten all nodes for path validation
-  const flatActiveNodes = useMemo(() => {
-    return tocAllLangs[language] ?? tocAllLangs.all ?? [];
-  }, [tocAllLangs, language]);
-
-  // ── Clear stale path after collection/language switch ─────────────────────
   useEffect(() => {
-    if (selectedTocPath && !doesTocPathExist(flatActiveNodes, selectedTocPath)) {
-      setSelectedTocPath(null);
-    }
-  }, [flatActiveNodes, selectedTocPath]);
+    if (!selectedTocPath) return;
+    const exists = resources.some((resource) =>
+      resource.collection === selectedCollection &&
+      (language === "all" || language === resource.language) &&
+      selectedTocPath.every((segment, index) => resource.tocPath?.[index] === segment)
+    );
+    if (!exists) setSelectedTocPath(null);
+  }, [resources, selectedCollection, language, selectedTocPath]);
 
   const publicFacetSelection = useMemo<ResourceFacetSelection>(
     () => ({
@@ -942,7 +936,7 @@ export default function ResourceExplorer({
               </svg>
               <span className="text-xs font-mono hidden sm:inline">筛选</span>
               {activeFilterCount > 0 && (
-                <span className="min-w-4 h-4 px-1 rounded-full bg-archive-accent text-archive-bg font-mono text-[9px] font-bold flex items-center justify-center">
+                <span className="min-w-4 h-4 px-1 rounded-full bg-archive-accent text-archive-bg font-mono text-[11px] font-bold flex items-center justify-center">
                   {activeFilterCount}
                 </span>
               )}
@@ -952,7 +946,7 @@ export default function ResourceExplorer({
 
         {/* Collection Tabs */}
         {collections && collections.length > 0 && (
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 border-b border-archive-border/30 no-scrollbar">
+          <div ref={collectionStrip} className="flex items-center gap-1.5 overflow-x-auto pb-1 border-b border-archive-border/30 no-scrollbar">
           {displayCollections.map((col) => (
               <CollectionTab
                 key={col.id}
@@ -964,143 +958,144 @@ export default function ResourceExplorer({
           </div>
         )}
 
-        {showPublicFacets && COLLECTION_CONTEXT[selectedCollection] && (
-          <p className="font-sans text-[11px] leading-relaxed text-archive-subtle/65">
-            {COLLECTION_CONTEXT[selectedCollection]}
-          </p>
-        )}
-
-        {selectedCollection === "github" && (
-          <div className="hidden lg:block">
-            <GitHubBrowseControls
-              mode={githubBrowseMode}
-              onModeChange={handleGitHubModeChange}
-              capabilityOptions={githubCapabilityOptions}
-              techStackOptions={githubTechStackOptions}
-              healthCounts={githubHealthCounts}
-              selectedCapability={githubCapability}
-              selectedTechStack={githubTechStack}
-              selectedHealth={githubHealth}
-              localEntryCount={githubTimelineCounts.localEntries}
-              manualReviewCount={githubTimelineCounts.manualReviews}
-              onCapabilityChange={handleGitHubCapabilityChange}
-              onTechStackChange={handleGitHubTechStackChange}
-              onHealthChange={handleGitHubHealthChange}
-            />
-          </div>
-        )}
-
-        {/* Active Filter Chips - only rendered when activeFilterCount > 0 */}
-        {activeFilterCount > 0 && (
-          <div className="flex items-center gap-2.5 flex-wrap min-h-[28px] empty:hidden py-1">
-            <span className="font-mono text-[11px] text-archive-accent/90 select-none shrink-0 font-medium">
-              已选筛选：
-            </span>
-
-            {/* Path breadcrumb pill */}
-            {showPublicFacets &&
-              selectedTocPath &&
-              selectedTocPath.length > 0 && (
-                <PathPill
-                  path={selectedTocPath}
-                  onClear={() => handleSelectTocPath(null)}
-                />
-              )}
-
-            {/* Language pill (shown when not "all") */}
-            {language !== "all" && (
-              <div className="inline-flex items-center gap-1.5 rounded-full border border-archive-border/60 bg-archive-surface/80 px-3 py-1 text-xs animate-fade-in">
-                <span className="font-mono text-[9px] uppercase tracking-wider text-archive-subtle/60">
-                  语言
-                </span>
-                <span className="font-sans text-archive-text font-medium">
-                  {language === "zh" ? "中文" : "EN"}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => handleLanguageChange("all")}
-                  className="ml-0.5 shrink-0 font-mono text-xs font-bold text-archive-subtle transition-colors hover:text-archive-accent"
-                  aria-label="清除语言筛选"
-                >
-                  ×
-                </button>
-              </div>
-            )}
-
-            {showPublicFacets &&
-              selectedTopics.map((topic) => (
-                <PublicFilterPill
-                  key={topic}
-                  label="主题"
-                  value={getCanonicalTopicLabel(topic, "zh")}
-                  onClear={() => handleTopicToggle(topic)}
-                />
-              ))}
-
-            {showPublicFacets &&
-              selectedSubcategories.map((subcategory) => {
-                const option = resourceFacetModel.subcategories.find(
-                  (candidate) => candidate.value === subcategory,
-                );
-                return (
-                  <PublicFilterPill
-                    key={subcategory}
-                    label="分类"
-                    value={option?.labelZh ?? option?.labelEn ?? humanizeId(subcategory)}
-                    onClear={() => handleSubcategoryToggle(subcategory)}
-                  />
-                );
-              })}
-
-            {showPublicFacets &&
-              selectedResourceTypes.map((resourceType) => {
-                const option = resourceFacetModel.resourceTypes.find(
-                  (candidate) => candidate.value === resourceType,
-                );
-                return (
-                  <PublicFilterPill
-                    key={resourceType}
-                    label="类型"
-                    value={TYPE_LABELS[resourceType] ?? humanizeId(resourceType)}
-                    onClear={() => handleResourceTypeToggle(resourceType)}
-                  />
-                );
-              })}
-
-            {selectedCollection === "github" && githubCapability && (
-              <GitHubFilterPill
-                label="能力"
-                value={formatGitHubFacetLabel(githubCapability)}
-                onClear={() => handleGitHubCapabilityChange("")}
-              />
-            )}
-
-            {selectedCollection === "github" && githubTechStack && (
-              <GitHubFilterPill
-                label="技术栈"
-                value={formatGitHubFacetLabel(githubTechStack)}
-                onClear={() => handleGitHubTechStackChange("")}
-              />
-            )}
-
-            {selectedCollection === "github" && githubHealth && (
-              <GitHubFilterPill
-                label="状态"
-                value={formatGitHubFacetLabel(githubHealth)}
-                onClear={() => handleGitHubHealthChange("")}
-              />
-            )}
-
-            {/* Clear all */}
-            <button
-              onClick={handleClear}
-              className="ml-auto font-mono text-xs text-archive-accent hover:text-archive-accent-glow hover:underline transition-colors shrink-0 cursor-pointer"
-            >
-              清除全部
-            </button>
-          </div>
-        )}
       </div>
+
+      {showPublicFacets && COLLECTION_CONTEXT[selectedCollection] && (
+        <p className="font-sans text-[11px] leading-relaxed text-archive-subtle">
+          {COLLECTION_CONTEXT[selectedCollection]}
+        </p>
+      )}
+
+      {selectedCollection === "github" && (
+        <div className="hidden lg:block">
+          <GitHubBrowseControls
+            mode={githubBrowseMode}
+            onModeChange={handleGitHubModeChange}
+            capabilityOptions={githubCapabilityOptions}
+            techStackOptions={githubTechStackOptions}
+            healthCounts={githubHealthCounts}
+            selectedCapability={githubCapability}
+            selectedTechStack={githubTechStack}
+            selectedHealth={githubHealth}
+            localEntryCount={githubTimelineCounts.localEntries}
+            manualReviewCount={githubTimelineCounts.manualReviews}
+            onCapabilityChange={handleGitHubCapabilityChange}
+            onTechStackChange={handleGitHubTechStackChange}
+            onHealthChange={handleGitHubHealthChange}
+          />
+        </div>
+      )}
+
+      {/* Active Filter Chips - only rendered when activeFilterCount > 0 */}
+      {activeFilterCount > 0 && (
+        <div className="flex items-center gap-2.5 flex-wrap min-h-[28px] empty:hidden py-1">
+          <span className="font-mono text-[11px] text-archive-accent/90 select-none shrink-0 font-medium">
+            已选筛选：
+          </span>
+
+          {/* Path breadcrumb pill */}
+          {showPublicFacets &&
+            selectedTocPath &&
+            selectedTocPath.length > 0 && (
+              <PathPill
+                path={selectedTocPath}
+                onClear={() => handleSelectTocPath(null)}
+              />
+            )}
+
+          {/* Language pill (shown when not "all") */}
+          {language !== "all" && (
+            <div className="inline-flex items-center gap-1.5 rounded-full border border-archive-border/60 bg-archive-surface/80 px-3 py-1 text-xs animate-fade-in">
+              <span className="font-mono text-[11px] uppercase tracking-wider text-archive-subtle">
+                语言
+              </span>
+              <span className="font-sans text-archive-text font-medium">
+                {language === "zh" ? "中文" : "EN"}
+              </span>
+              <button
+                type="button"
+                onClick={() => handleLanguageChange("all")}
+                className="ml-0.5 shrink-0 font-mono text-xs font-bold text-archive-subtle transition-colors hover:text-archive-accent"
+                aria-label="清除语言筛选"
+              >
+                ×
+              </button>
+            </div>
+          )}
+
+          {showPublicFacets &&
+            selectedTopics.map((topic) => (
+              <PublicFilterPill
+                key={topic}
+                label="主题"
+                value={getCanonicalTopicLabel(topic, "zh")}
+                onClear={() => handleTopicToggle(topic)}
+              />
+            ))}
+
+          {showPublicFacets &&
+            selectedSubcategories.map((subcategory) => {
+              const option = resourceFacetModel.subcategories.find(
+                (candidate) => candidate.value === subcategory,
+              );
+              return (
+                <PublicFilterPill
+                  key={subcategory}
+                  label="分类"
+                  value={option?.labelZh ?? option?.labelEn ?? humanizeId(subcategory)}
+                  onClear={() => handleSubcategoryToggle(subcategory)}
+                />
+              );
+            })}
+
+          {showPublicFacets &&
+            selectedResourceTypes.map((resourceType) => {
+              const option = resourceFacetModel.resourceTypes.find(
+                (candidate) => candidate.value === resourceType,
+              );
+              return (
+                <PublicFilterPill
+                  key={resourceType}
+                  label="类型"
+                  value={TYPE_LABELS[resourceType] ?? humanizeId(resourceType)}
+                  onClear={() => handleResourceTypeToggle(resourceType)}
+                />
+              );
+            })}
+
+          {selectedCollection === "github" && githubCapability && (
+            <GitHubFilterPill
+              label="能力"
+              value={formatGitHubFacetLabel(githubCapability)}
+              onClear={() => handleGitHubCapabilityChange("")}
+            />
+          )}
+
+          {selectedCollection === "github" && githubTechStack && (
+            <GitHubFilterPill
+              label="技术栈"
+              value={formatGitHubFacetLabel(githubTechStack)}
+              onClear={() => handleGitHubTechStackChange("")}
+            />
+          )}
+
+          {selectedCollection === "github" && githubHealth && (
+            <GitHubFilterPill
+              label="状态"
+              value={formatGitHubFacetLabel(githubHealth)}
+              onClear={() => handleGitHubHealthChange("")}
+            />
+          )}
+
+          {/* Clear all */}
+          <button
+            onClick={handleClear}
+            className="ml-auto font-mono text-xs text-archive-accent hover:text-archive-accent-glow hover:underline transition-colors shrink-0 cursor-pointer"
+          >
+            清除全部
+          </button>
+        </div>
+      )}
 
       {/* ── Results Count ────────────────────────────────────────────────── */}
       <div
@@ -1120,7 +1115,7 @@ export default function ResourceExplorer({
           )}
         </span>
         {/* Active collection badge */}
-        <span className="font-mono text-[10px] text-archive-subtle opacity-50 border border-archive-border/40 px-2 py-0.5 rounded-full">
+        <span className="font-mono text-[11px] text-archive-subtle border border-archive-border/40 px-2 py-0.5 rounded-full">
           {displayCollections.find((c) => c.id === selectedCollection)?.label ?? selectedCollection}
         </span>
       </div>
@@ -1276,6 +1271,56 @@ interface FilterDrawerProps {
   resultCount: number;
 }
 
+/** Both drawers are portaled outside the shell, so its controls can be inert while open. */
+function useDrawerFocus(
+  ref: React.RefObject<HTMLDivElement>,
+  open: boolean,
+  close: () => void,
+  mobileOnly = false,
+) {
+  useEffect(() => {
+    if (!open) return;
+    const trigger = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const shell = document.querySelector<HTMLElement>("[data-app-shell]");
+    const wasInert = shell?.inert ?? false;
+    const overflow = document.body.style.overflow;
+    const controls = () => Array.from(ref.current?.querySelectorAll<HTMLElement>(
+      'button:not(:disabled), a[href], input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex="0"]'
+    ) ?? []).filter((element) => element.getClientRects().length > 0);
+    controls()[0]?.focus({ preventScroll: true });
+    if (shell) shell.inert = true;
+    document.body.style.overflow = "hidden";
+
+    const onKey = (event: KeyboardEvent) => {
+      if (event.isComposing) return;
+      if (event.key === "Escape") {
+        event.preventDefault();
+        close();
+      }
+      if (event.key !== "Tab") return;
+      const items = controls();
+      const edge = event.shiftKey ? items[0] : items[items.length - 1];
+      if (document.activeElement === edge) {
+        event.preventDefault();
+        (event.shiftKey ? items[items.length - 1] : items[0])?.focus();
+      }
+    };
+    const desktop = mobileOnly ? window.matchMedia("(min-width: 1024px)") : null;
+    const onResize = () => { if (desktop?.matches) close(); };
+    desktop?.addEventListener("change", onResize);
+    onResize();
+    window.addEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      desktop?.removeEventListener("change", onResize);
+      if (shell) shell.inert = wasInert;
+      document.body.style.overflow = overflow;
+      const target = trigger?.getClientRects().length ? trigger : document.getElementById("resource-search-input");
+      target?.focus({ preventScroll: true });
+    };
+  }, [ref, open, close, mobileOnly]);
+}
+
 function FilterDrawer({
   isOpen,
   onClose,
@@ -1294,69 +1339,8 @@ function FilterDrawer({
 }: FilterDrawerProps) {
   const [mounted, setMounted] = useState(false);
   const drawerRef = useRef<HTMLDivElement>(null);
-  const triggerRef = useRef<HTMLElement | null>(null);
-
-  // Preserve and restore body scroll correctly
-  useEffect(() => {
-    if (isOpen) {
-      setMounted(true);
-      const originalStyle = document.body.style.overflow;
-      document.body.style.overflow = "hidden";
-      return () => {
-        document.body.style.overflow = originalStyle;
-      };
-    } else {
-      setMounted(false);
-    }
-  }, [isOpen]);
-
-  // Focus trap, Escape key, and initial/return focus
-  useEffect(() => {
-    if (isOpen) {
-      triggerRef.current = document.activeElement as HTMLElement;
-
-      const timer = setTimeout(() => {
-        const focusables = drawerRef.current?.querySelectorAll(
-          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-        );
-        if (focusables && focusables.length > 0) {
-          (focusables[0] as HTMLElement).focus();
-        }
-      }, 50);
-
-      const handleKeyDown = (e: KeyboardEvent) => {
-        if (e.key === "Escape") onClose();
-        if (e.key === "Tab") {
-          const focusables = drawerRef.current?.querySelectorAll(
-            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-          ) as NodeListOf<HTMLElement>;
-          if (!focusables || focusables.length === 0) return;
-
-          const first = focusables[0]!;
-          const last = focusables[focusables.length - 1]!;
-
-          if (e.shiftKey) {
-            if (document.activeElement === first) {
-              last.focus();
-              e.preventDefault();
-            }
-          } else {
-            if (document.activeElement === last) {
-              first.focus();
-              e.preventDefault();
-            }
-          }
-        }
-      };
-
-      window.addEventListener("keydown", handleKeyDown);
-      return () => {
-        clearTimeout(timer);
-        window.removeEventListener("keydown", handleKeyDown);
-        triggerRef.current?.focus();
-      };
-    }
-  }, [isOpen, onClose]);
+  useDrawerFocus(drawerRef, isOpen, onClose, true);
+  useEffect(() => setMounted(isOpen), [isOpen]);
 
   if (!isOpen || typeof document === "undefined") return null;
 
@@ -1459,64 +1443,21 @@ function ResourceDrawer({
   const [mounted, setMounted] = useState(false);
   const searchParams = useSearchParams();
   const drawerRef = useRef<HTMLDivElement>(null);
-  const triggerRef = useRef<HTMLElement | null>(null);
-
+  const closeTimer = useRef<ReturnType<typeof setTimeout>>();
   const handleClose = useCallback(() => {
     setMounted(false);
-    setTimeout(onClose, 250); // Wait for transition animation to finish
+    clearTimeout(closeTimer.current);
+    closeTimer.current = setTimeout(onClose, 250);
   }, [onClose]);
 
+  useDrawerFocus(drawerRef, true, handleClose);
   useEffect(() => {
-    const originalStyle = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-
-    triggerRef.current = document.activeElement as HTMLElement;
-
-    const animTimer = setTimeout(() => setMounted(true), 10);
-    const focusTimer = setTimeout(() => {
-      const focusables = drawerRef.current?.querySelectorAll(
-        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-      );
-      if (focusables && focusables.length > 0) {
-        (focusables[0] as HTMLElement).focus();
-      }
-    }, 50);
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") handleClose();
-      if (e.key === "Tab") {
-        const focusables = drawerRef.current?.querySelectorAll(
-          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-        ) as NodeListOf<HTMLElement>;
-        if (!focusables || focusables.length === 0) return;
-
-        const first = focusables[0]!;
-        const last = focusables[focusables.length - 1]!;
-
-        if (e.shiftKey) {
-          if (document.activeElement === first) {
-            last.focus();
-            e.preventDefault();
-          }
-        } else {
-          if (document.activeElement === last) {
-            first.focus();
-            e.preventDefault();
-          }
-        }
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-
+    const frame = requestAnimationFrame(() => setMounted(true));
     return () => {
-      clearTimeout(animTimer);
-      clearTimeout(focusTimer);
-      window.removeEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = originalStyle;
-      triggerRef.current?.focus();
+      cancelAnimationFrame(frame);
+      clearTimeout(closeTimer.current);
     };
-  }, [handleClose]);
+  }, []);
 
   const queryString = searchParams ? searchParams.toString() : "";
   const detailUrl = `/resource/${resource.id}${queryString ? "?" + queryString : ""}`;
@@ -1554,7 +1495,7 @@ function ResourceDrawer({
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-archive-border/60 shrink-0 bg-archive-bg/10 relative z-10">
           <div className="flex items-center gap-2">
-            <span className="font-mono text-[10px] uppercase tracking-widest text-archive-subtle">
+            <span className="font-mono text-[11px] uppercase tracking-widest text-archive-subtle">
               资源详情
             </span>
           </div>
@@ -1580,7 +1521,7 @@ function ResourceDrawer({
             {githubFavorite && (
               <GitHubHealthBadge favorite={githubFavorite} />
             )}
-            <span className="font-mono text-[10px] text-archive-subtle ml-auto">
+            <span className="font-mono text-[11px] text-archive-subtle ml-auto">
               ID: {resource.id.slice(0, 8)}
             </span>
           </div>
@@ -1609,7 +1550,7 @@ function ResourceDrawer({
                   {evidenceSummary}
                 </p>
               ) : (
-                <p className="font-mono text-[10px] text-archive-subtle/60 leading-relaxed">
+                <p className="font-mono text-[11px] text-archive-subtle leading-relaxed">
                   暂无简介，可访问原站了解详情。
                 </p>
               )}
@@ -1619,7 +1560,7 @@ function ResourceDrawer({
           {/* Metadata Fields */}
           <div className="space-y-4 pt-2">
             <div>
-              <h4 className="font-mono text-[10px] uppercase tracking-widest text-archive-subtle mb-1">
+              <h4 className="font-mono text-[11px] uppercase tracking-widest text-archive-subtle mb-1">
                 分类
               </h4>
               <p className="font-sans text-sm text-archive-text">
@@ -1633,7 +1574,7 @@ function ResourceDrawer({
             </div>
 
             <div>
-              <h4 className="font-mono text-[10px] uppercase tracking-widest text-archive-subtle mb-1">
+              <h4 className="font-mono text-[11px] uppercase tracking-widest text-archive-subtle mb-1">
                 来源
               </h4>
               <p className="font-sans text-sm text-archive-text">
@@ -1642,7 +1583,7 @@ function ResourceDrawer({
             </div>
 
             <div>
-              <h4 className="font-mono text-[10px] uppercase tracking-widest text-archive-subtle mb-1">
+              <h4 className="font-mono text-[11px] uppercase tracking-widest text-archive-subtle mb-1">
                 原站链接
               </h4>
               <a
@@ -1659,7 +1600,7 @@ function ResourceDrawer({
 
           {/* Tags */}
           <div className="pt-2 border-t border-archive-border/40">
-            <h4 className="font-mono text-[10px] uppercase tracking-widest text-archive-subtle mb-2">
+            <h4 className="font-mono text-[11px] uppercase tracking-widest text-archive-subtle mb-2">
               {githubFavorite ? "能力标签" : "标签"}
             </h4>
             {githubFavorite ? (
@@ -1672,7 +1613,7 @@ function ResourceDrawer({
                 {resource.tags.map((tag) => (
                   <span
                     key={tag}
-                    className="font-mono text-[10px] px-2.5 py-1 bg-archive-bg border border-archive-border rounded-sm text-archive-subtle hover:text-archive-text transition-colors"
+                    className="font-mono text-[11px] px-2.5 py-1 bg-archive-bg border border-archive-border rounded-sm text-archive-subtle hover:text-archive-text transition-colors"
                   >
                     #{tag}
                   </span>

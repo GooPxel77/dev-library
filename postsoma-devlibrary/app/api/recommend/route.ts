@@ -3,17 +3,9 @@ import { matchAndRecommend } from "@/lib/data/recommend";
 import { getAllResources } from "@/lib/data/resources";
 import type { Difficulty } from "@/lib/types/resource";
 
-export async function GET(request: NextRequest) {
-  // In production static export, route handlers must be static.
-  // We return a static fallback placeholder to bypass webpack pre-render errors,
-  // since recommendations in production run entirely on the client side.
-  if (process.env.NODE_ENV === "production") {
-    return NextResponse.json({
-      status: "static_export",
-      message: "Recommendations in production build run entirely client-side."
-    });
-  }
+export const dynamic = "force-dynamic";
 
+export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
 
   const goal = searchParams.get("goal") || "";

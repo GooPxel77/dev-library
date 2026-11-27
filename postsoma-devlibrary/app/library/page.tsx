@@ -1,6 +1,5 @@
 import AppShell from "@/components/layout/AppShell";
 import LocalLibraryClient from "@/components/library/LocalLibraryClient";
-import { getAllResources } from "@/lib/data/resources";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -20,8 +19,7 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function LibraryPage() {
-  const allResources = await getAllResources();
+export default function LibraryPage() {
 
   return (
     <AppShell>
@@ -37,7 +35,7 @@ export default async function LibraryPage() {
       </div>
 
       {/* Render local library logic */}
-      <LocalLibraryClient allResources={allResources} />
+      <LocalLibraryClient />
     </AppShell>
   );
 }

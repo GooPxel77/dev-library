@@ -234,14 +234,14 @@ export default async function ResourceDetailPage({
                       {displayDetailSummary}
                     </p>
                   ) : (
-                    <p className="font-mono text-[10px] text-archive-subtle/60 leading-relaxed">
+                    <p className="font-mono text-[11px] text-archive-subtle leading-relaxed">
                       暂无简介，可访问原站了解详情。
                     </p>
                   )}
                 </div>
                 {githubFavorite && (
                   <div className="mt-4">
-                    <p className="mb-2 font-mono text-[10px] uppercase tracking-widest text-teal-400">
+                    <p className="mb-2 font-mono text-[11px] uppercase tracking-widest text-teal-400">
                       GitHub 项目资料
                     </p>
                     <GitHubResearchDetails favorite={githubFavorite} />
@@ -254,27 +254,27 @@ export default async function ResourceDetailPage({
           <div className="flex items-start flex-col sm:flex-row gap-6 mb-10 relative z-10">
             <div className="flex-1 space-y-4">
               <div>
-                <h3 className="font-mono text-[10px] uppercase tracking-widest text-archive-subtle mb-1">
+                <h2 className="font-mono text-[11px] uppercase tracking-widest text-archive-subtle mb-1">
                   分类
-                </h3>
+                </h2>
                 <p className="font-sans text-sm text-archive-text">
                   {facetBreadcrumb.join(" / ")}
                 </p>
               </div>
 
               <div>
-                <h3 className="font-mono text-[10px] uppercase tracking-widest text-archive-subtle mb-1">
+                <h2 className="font-mono text-[11px] uppercase tracking-widest text-archive-subtle mb-1">
                   来源
-                </h3>
+                </h2>
                 <p className="font-sans text-sm text-archive-text">
                   {getProviderLabel(resource.url)}
                 </p>
               </div>
 
               <div>
-                <h3 className="font-mono text-[10px] uppercase tracking-widest text-archive-subtle mb-1">
+                <h2 className="font-mono text-[11px] uppercase tracking-widest text-archive-subtle mb-1">
                   原站链接
-                </h3>
+                </h2>
                 <a
                   href={resource.url}
                   target="_blank"
@@ -291,9 +291,9 @@ export default async function ResourceDetailPage({
           {/* Editorial Decision Panel (Best For & Access Note) */}
           {(displayBestFor.length > 0 || displayAccessNote) && (
             <div className="bg-archive-surface border border-archive-border rounded-sm p-4 sm:p-5 mb-8 relative z-10 space-y-4">
-              <h3 className="font-mono text-[10px] uppercase tracking-widest text-teal-400 mb-1">
+              <h2 className="font-mono text-[11px] uppercase tracking-widest text-teal-400 mb-1">
                 编辑备注
-              </h3>
+              </h2>
               {displayBestFor.length > 0 && (
                 <div className="space-y-1.5">
                   <p className="font-sans text-xs text-archive-text font-semibold">
@@ -328,9 +328,9 @@ export default async function ResourceDetailPage({
           {/* Low-Emphasis AI Meta Box */}
           {!githubFavorite && (resource.keyTakeaway || resource.priority || resource.action) && (
             <div className="bg-archive-surface border border-archive-border rounded-sm p-4 sm:p-5 mb-8 relative z-10 space-y-3">
-              <h3 className="font-mono text-[10px] uppercase tracking-widest text-archive-subtle mb-1">
+              <h2 className="font-mono text-[11px] uppercase tracking-widest text-archive-subtle mb-1">
                 AI 工作流记录
-              </h3>
+              </h2>
               {resource.keyTakeaway && (
                 <p className="font-sans text-xs sm:text-sm text-archive-subtle leading-relaxed">
                   <strong className="text-archive-text font-medium">要点：</strong> {resource.keyTakeaway}
@@ -362,7 +362,7 @@ export default async function ResourceDetailPage({
                 {resource.tags.map((tag) => (
                   <span
                     key={tag}
-                    className="font-mono text-[10px] px-2 py-1 bg-archive-bg border border-archive-border rounded-sm text-archive-subtle"
+                    className="font-mono text-[11px] px-2 py-1 bg-archive-bg border border-archive-border rounded-sm text-archive-subtle"
                   >
                     {tag}
                   </span>

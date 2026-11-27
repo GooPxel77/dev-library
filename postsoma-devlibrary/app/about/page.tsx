@@ -30,7 +30,7 @@ export default async function AboutPage() {
         <section id="about" className="space-y-4 scroll-mt-20 text-sm leading-relaxed text-archive-subtle">
           <h2 className="font-display text-xl text-archive-text">关于本站</h2>
           <p>PostSoma DevLibrary 整理了中英文编程书籍、课程、文档、互动练习和开源项目。资源链接指向原站，内容及访问条件可能随时间变化。</p>
-          <p>搜索与推荐在浏览器中根据目录信息计算；推荐结果仅供参考，请访问原站判断内容是否适合你。</p>
+          <p>关键词搜索在浏览器内运行。启用站方 AI 后，点击获取推荐会将学习目标和筛选条件发给模型，由模型比较目录中的候选资源。</p>
         </section>
         <section id="criteria" className="space-y-4 scroll-mt-20 text-sm leading-relaxed text-archive-subtle">
           <h2 className="font-display text-xl text-archive-text">收录原则</h2>
@@ -39,14 +39,14 @@ export default async function AboutPage() {
         </section>
         <section id="data" className="space-y-4 scroll-mt-20 text-sm leading-relaxed text-archive-subtle">
           <h2 className="font-display text-xl text-archive-text">数据与隐私</h2>
-          <p>基础目录来自 <a href="https://github.com/EbookFoundation/free-programming-books" target="_blank" rel="noopener noreferrer" className="text-archive-accent hover:underline">free-programming-books ↗</a>，并加入人工整理的 GitHub 项目。{updated && ` 当前目录生成于 ${updated}。`}</p>
-          <p>收藏保存在当前浏览器的本地存储中，不会自动同步到其他设备。清除浏览器数据可能删除收藏。</p>
+          <p>基础目录来自 <a href="https://github.com/EbookFoundation/free-programming-books" target="_blank" rel="noopener noreferrer" className="text-archive-accent underline underline-offset-4">free-programming-books ↗</a>，并加入人工整理的 GitHub 项目。{updated && ` 当前目录生成于 ${updated}。`}</p>
+          <p>AI 推荐结果保存在当前标签页，便于查看资源后返回。收藏保存在当前浏览器的本地存储中，不会自动同步到其他设备。清除浏览器数据可能删除收藏。</p>
           {isGoogleAnalyticsEnabled && <p>线上版本启用 Google Analytics，用于网站访问统计。</p>}
-          <p>目录数据以静态文件提供；<Link href="/llms.txt" className="text-archive-accent hover:underline">查看机器可读说明</Link>。</p>
+          <p>目录数据以静态文件提供；<Link href="/llms.txt" className="text-archive-accent underline underline-offset-4">查看机器可读说明</Link>。</p>
         </section>
         <div className="pt-6 border-t border-archive-border flex flex-wrap justify-between gap-4 text-sm">
           <Link href="/" className="text-archive-subtle hover:text-archive-accent">← 返回首页</Link>
-          <Link href="/resources" className="text-archive-accent hover:underline">浏览资源库 →</Link>
+          <Link prefetch={false} href="/resources" className="text-archive-accent underline underline-offset-4">浏览资源库 →</Link>
         </div>
       </div>
     </AppShell>

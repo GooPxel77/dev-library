@@ -53,7 +53,7 @@ function GitHubRecallContext({ favorite }: { favorite: GitHubFavorite }) {
   }
 
   return (
-    <div className="mb-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 px-3 font-mono text-[9px] text-archive-subtle/65">
+    <div className="mb-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 px-3 font-mono text-[11px] text-archive-subtle">
       {trustedDiscoveryDate && (
         <span>
           收藏于 ·{" "}
@@ -96,7 +96,7 @@ function GitHubMatchReasons({
       className="mt-1.5 flex flex-wrap items-center gap-1.5 px-3"
       aria-label="搜索匹配原因"
     >
-      <span className="mr-0.5 font-mono text-[8px] uppercase tracking-widest text-archive-subtle/45">
+      <span className="mr-0.5 font-mono text-[11px] uppercase tracking-widest text-archive-subtle">
         匹配
       </span>
       {visible.map((reason) => {
@@ -104,10 +104,10 @@ function GitHubMatchReasons({
         return (
           <span
             key={`${reason.kind}-${reason.label}-${reason.value}`}
-            className={`rounded-full border px-2 py-0.5 font-mono text-[8px] leading-none ${
+            className={`rounded-full border px-2 py-0.5 font-mono text-[11px] leading-none ${
               isStructured
                 ? "border-teal-500/30 bg-teal-500/[0.06] text-teal-300/85"
-                : "border-archive-border/55 bg-archive-bg/40 text-archive-subtle/70"
+                : "border-archive-border/55 bg-archive-bg/40 text-archive-subtle"
             }`}
           >
             {isStructured
@@ -117,7 +117,7 @@ function GitHubMatchReasons({
         );
       })}
       {remaining > 0 && (
-        <span className="font-mono text-[8px] text-archive-subtle/45">
+        <span className="font-mono text-[11px] text-archive-subtle">
           +{remaining}
         </span>
       )}
@@ -209,7 +209,7 @@ export default function ResourceGrid({
           {onToggleViewMode && (
             <button
               onClick={() => onToggleViewMode("resources")}
-              className="px-4 py-2 border border-archive-border hover:border-archive-muted text-[10px] font-mono text-archive-accent hover:text-archive-text bg-archive-surface active:scale-95 transition-all rounded"
+              className="px-4 py-2 border border-archive-border hover:border-archive-muted text-[11px] font-mono text-archive-accent hover:text-archive-text bg-archive-surface active:scale-95 transition-all rounded"
             >
               Switch to Raw Data →
             </button>

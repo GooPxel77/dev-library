@@ -1,4 +1,11 @@
 import type { Resource, Difficulty } from "../types/resource";
+import { getSearchAliases, normalizeLearningQuery } from "./search-aliases";
+
+export type RecommendationResource = Pick<Resource,
+  "id" | "title" | "url" | "language" | "type" | "category" | "subcategory" |
+  "tags" | "collection" | "difficulty" | "summary" | "cardSummary" | "detailSummary" |
+  "editorNote" | "source" | "quality"
+>;
 
 export interface RecommendOptions {
   goal: string;
@@ -25,6 +32,10 @@ export interface RecommendationPick {
   type: string;
   language: string;
   category: string;
+  difficulty?: Difficulty;
+  subcategory?: string;
+  summary?: string;
+  matchEvidence: string;
   take: "Quick Start" | "Comprehensive" | "Project-oriented" | "Featured Match";
   explanation: PickExplanation;
 }
@@ -42,7 +53,7 @@ export interface RecommendationResult {
 }
 
 // Calculate evidence status based on Catalog Contract rules
-function getEvidenceStatus(res: Resource): "high" | "medium" | "low" {
+function getEvidenceStatus(res: RecommendationResource): "high" | "medium" | "low" {
   const hasDesc = !!(res.summary || res.cardSummary || res.detailSummary);
   const hasDiff = !!res.difficulty;
   const hasNote = !!res.editorNote;
@@ -60,8 +71,8 @@ function getEvidenceStatus(res: Resource): "high" | "medium" | "low" {
 
 // Heuristic rule generator for pick explanation text
 function generateHeuristicExplanation(
-  res: Resource,
-  alternativeRes: Resource | null,
+  res: RecommendationResource,
+  alternativeRes: RecommendationResource | null,
   langPref: "zh" | "en" | "all"
 ): PickExplanation {
   const isZh = langPref === "zh" || res.language === "zh";
@@ -103,8 +114,29 @@ function matchesToken(text: string, token: string): boolean {
   return text.includes(token);
 }
 
+function explainMatch(resource: RecommendationResource, tokens: string[]): string {
+  const fields: [string, string][] = [
+    ["标题", resource.title],
+    ...resource.tags.map((tag): [string, string] => ["标签", tag]),
+    ["分类", resource.subcategory || ""],
+    ["分类", resource.category],
+    ["简介", resource.summary || resource.cardSummary || ""],
+  ];
+  for (const [label, value] of fields) {
+    const normalized = value.toLowerCase();
+    const hits = tokens.filter((token) => matchesToken(normalized, token));
+    if (hits.length) {
+      return `${label}匹配 · ${hits.map((token) => {
+        const start = normalized.indexOf(token);
+        return value.slice(start, start + token.length);
+      }).join("、")}`;
+    }
+  }
+  return resource.subcategory || resource.category;
+}
+
 // Client/Server shared matching engine
-export async function matchAndRecommend(all: Resource[], options: RecommendOptions): Promise<RecommendationResult> {
+export async function matchAndRecommend(all: RecommendationResource[], options: RecommendOptions): Promise<RecommendationResult> {
 
   // 1. Language filter (Strict)
   let filtered = all;
@@ -129,12 +161,14 @@ export async function matchAndRecommend(all: Resource[], options: RecommendOptio
     diffFiltered = formatFiltered.filter((r) => r.difficulty === options.difficulty);
   }
 
-  const queryTokens = options.goal
-    .toLowerCase()
-    .split(/[\s,，.。\/、]+/)
-    .filter(Boolean);
+  const goal = normalizeLearningQuery(options.goal).toLowerCase();
+  const aliases = getSearchAliases(goal);
+  const words = goal.split(/[\s,，。/、]+/).filter(Boolean);
+  const queryTokens = aliases.length
+    ? [goal, ...aliases]
+    : Array.from(new Set(words.flatMap((word) => [word, ...getSearchAliases(word)])));
 
-  const countScoredMatches = (list: Resource[]) => {
+  const countScoredMatches = (list: RecommendationResource[]) => {
     let cnt = 0;
     for (const res of list) {
       const title = res.title.toLowerCase();
@@ -180,7 +214,7 @@ export async function matchAndRecommend(all: Resource[], options: RecommendOptio
   const totalRelated = finalFiltered.length;
 
   interface ScoredResource {
-    resource: Resource;
+    resource: RecommendationResource;
     score: number;
   }
 
@@ -214,95 +248,48 @@ export async function matchAndRecommend(all: Resource[], options: RecommendOptio
   scoredList.sort((a, b) => b.score - a.score);
 
   const matched = scoredList.map((x) => x.resource);
-  const comparedList = matched.slice(0, 8);
+  // Include ties at the cutoff so catalog file order cannot crowd out another format.
+  const cutoff = scoredList[7]?.score ?? 0;
+  const comparedList = scoredList.filter((entry) => entry.score >= cutoff).map((entry) => entry.resource);
 
   const picks: RecommendationPick[] = [];
 
   if (comparedList.length > 0) {
-    // We want to pick 3 distinct takes
-    // Take A: Quick Start (Tutorial / Interactive / Articles)
-    // Take B: Comprehensive (Book / Course)
-    // Take C: Project-oriented / Action-oriented (GitHub / Apps / Tools)
-
     const usedIds = new Set<string>();
-
-    const getAlternative = (excludeId: string, category: string): Resource | null => {
-      return (
-        all.find((r) => r.id !== excludeId && r.category === category && r.language === options.language) ||
-        null
-      );
-    };
-
-    // Take A
-    const pickA = comparedList.find(
-      (r) => r.type === "tutorial" || r.type === "interactive" || r.type === "article"
-    );
-    if (pickA) {
-      usedIds.add(pickA.id);
+    function addPick(resource: RecommendationResource | undefined, take: RecommendationPick["take"]) {
+      if (!resource || usedIds.has(resource.id)) return;
+      usedIds.add(resource.id);
+      const alternative = matched.find((r) => r.id !== resource.id && r.category === resource.category) ?? null;
       picks.push({
-        resourceId: pickA.id,
-        title: pickA.title,
-        url: pickA.url,
-        type: pickA.type,
-        language: pickA.language,
-        category: pickA.category,
-        take: "Quick Start",
-        explanation: generateHeuristicExplanation(pickA, getAlternative(pickA.id, pickA.category), options.language),
+        resourceId: resource.id,
+        title: resource.title,
+        url: resource.url,
+        type: resource.type,
+        language: resource.language,
+        category: resource.category,
+        subcategory: resource.subcategory,
+        difficulty: resource.difficulty,
+        summary: resource.cardSummary || resource.summary,
+        matchEvidence: explainMatch(resource, queryTokens),
+        take,
+        explanation: generateHeuristicExplanation(resource, alternative, options.language),
       });
     }
 
-    // Take B
-    const pickB = comparedList.find(
-      (r) => !usedIds.has(r.id) && (r.type === "book" || r.type === "course" || r.type === "documentation")
-    );
-    if (pickB) {
-      usedIds.add(pickB.id);
-      picks.push({
-        resourceId: pickB.id,
-        title: pickB.title,
-        url: pickB.url,
-        type: pickB.type,
-        language: pickB.language,
-        category: pickB.category,
-        take: "Comprehensive",
-        explanation: generateHeuristicExplanation(pickB, getAlternative(pickB.id, pickB.category), options.language),
-      });
+    addPick(comparedList.find((r) => ["tutorial", "interactive", "article"].includes(r.type)), "Quick Start");
+    const inDepth = comparedList.find((r) => r.type === "book" || r.type === "course")
+      ?? comparedList.find((r) => r.type === "documentation");
+    addPick(inDepth, "Comprehensive");
+    addPick(comparedList.find((r) => !usedIds.has(r.id) &&
+      (r.collection === "github" || ["app", "library", "cli"].includes(r.type))), "Project-oriented");
+    // Prefer another format among equally relevant candidates.
+    for (const resource of comparedList) {
+      if (picks.length === 3) break;
+      if (!picks.some((pick) => pick.type === resource.type)) addPick(resource, "Featured Match");
     }
-
-    // Take C
-    const pickC = comparedList.find(
-      (r) => !usedIds.has(r.id) && (r.collection === "github" || r.type === "app" || r.type === "library" || r.type === "cli")
-    );
-    if (pickC) {
-      usedIds.add(pickC.id);
-      picks.push({
-        resourceId: pickC.id,
-        title: pickC.title,
-        url: pickC.url,
-        type: pickC.type,
-        language: pickC.language,
-        category: pickC.category,
-        take: "Project-oriented",
-        explanation: generateHeuristicExplanation(pickC, getAlternative(pickC.id, pickC.category), options.language),
-      });
-    }
-
-    // Fill remaining picks to make exactly 3 if available and matched has more
-    for (const res of comparedList) {
-      if (picks.length >= 3) break;
-      if (!usedIds.has(res.id)) {
-        usedIds.add(res.id);
-        picks.push({
-          resourceId: res.id,
-          title: res.title,
-          url: res.url,
-          type: res.type,
-          language: res.language,
-          category: res.category,
-          take: "Featured Match",
-          explanation: generateHeuristicExplanation(res, getAlternative(res.id, res.category), options.language),
-        });
-      }
+    for (const resource of comparedList) {
+      if (picks.length === 3) break;
+      addPick(resource, "Featured Match");
     }
   }
 

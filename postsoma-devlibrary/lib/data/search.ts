@@ -1,6 +1,6 @@
 import MiniSearch from "minisearch";
 import type { Resource } from "@/lib/types/resource";
-import { getSearchAliases } from "./search-aliases";
+import { getSearchAliases, normalizeLearningQuery } from "./search-aliases";
 
 export interface SearchResourcesInput {
   query: string;
@@ -24,20 +24,6 @@ function buildIndex(resources: Resource[]): MiniSearch<Resource> {
       "canonicalSubcategory",
       "tags",
       "type",
-    ],
-    storeFields: [
-      "id",
-      "title",
-      "url",
-      "language",
-      "category",
-      "subcategory",
-      "type",
-      "tags",
-      "quality",
-      "source",
-      "sourcePath",
-      "updatedAt",
     ],
     searchOptions: {
       boost: { title: 3, category: 2, subcategory: 1.5 },
@@ -114,7 +100,7 @@ export function searchResources(
   const index = getOrBuildIndex(resources);
   const filteredById = new Map(filtered.map((resource) => [resource.id, resource]));
   const searchOptions = { filter: (result: { id: string }) => filteredById.has(result.id) };
-  const directMatches = index.search(query, searchOptions);
+  const directMatches = index.search(normalizeLearningQuery(query), searchOptions);
   const aliasMatches = getSearchAliases(query).flatMap((alias) =>
     index.search(alias, { ...searchOptions, combineWith: "AND" }),
   );

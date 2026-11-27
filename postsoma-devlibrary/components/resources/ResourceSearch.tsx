@@ -29,6 +29,7 @@ export default function ResourceSearch({
   // Keyboard shortcut: Cmd+K / Ctrl+K
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (inputRef.current?.closest("[inert]") || e.isComposing) return;
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
         e.preventDefault();
         inputRef.current?.focus();
@@ -99,11 +100,11 @@ export default function ResourceSearch({
           </span>
         )}
         {!value && (
-          <span className="hidden sm:flex items-center gap-0.5 font-mono text-xs text-archive-subtle opacity-50">
-            <kbd className="px-1 py-0.5 border border-archive-border rounded-sm text-[10px]">
+          <span className="hidden sm:flex items-center gap-0.5 font-mono text-xs text-archive-subtle">
+            <kbd className="px-1 py-0.5 border border-archive-border rounded-sm text-[11px]">
               ⌘
             </kbd>
-            <kbd className="px-1 py-0.5 border border-archive-border rounded-sm text-[10px]">
+            <kbd className="px-1 py-0.5 border border-archive-border rounded-sm text-[11px]">
               K
             </kbd>
           </span>

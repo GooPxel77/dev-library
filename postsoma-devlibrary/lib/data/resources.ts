@@ -1,3 +1,4 @@
+import type { RecommendationResource } from "./recommend";
 import type {
   Resource,
   ResourceFacetMetadata,
@@ -239,3 +240,25 @@ export async function getCollections() {
   }
 }
 
+export async function getRecommendationResources(): Promise<RecommendationResource[]> {
+  const all = await getAllResources();
+
+  // Share the same catalog projection between precomputed presets and on-demand recommendations.
+  return all.map((r) => ({
+    id: r.id,
+    title: r.title,
+    url: r.url,
+    type: r.type,
+    collection: r.collection,
+    language: r.language,
+    category: r.category,
+    subcategory: r.subcategory || undefined,
+    tags: r.tags,
+    summary: r.summary || undefined,
+    cardSummary: r.cardSummary || undefined,
+    quality: r.quality,
+    difficulty: r.difficulty || undefined,
+    editorNote: r.editorNote || undefined,
+    source: r.source,
+  }));
+}

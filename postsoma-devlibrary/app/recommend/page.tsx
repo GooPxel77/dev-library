@@ -1,7 +1,7 @@
 import { Suspense } from "react";
-import { getAllResources } from "@/lib/data/resources";
+import { getRecommendationResources } from "@/lib/data/resources";
 import { matchAndRecommend } from "@/lib/data/recommend";
-import type { Resource } from "@/lib/types/resource";
+import { isPlannerConfigured } from "@/lib/ai/planner";
 import RecommendClient from "@/components/recommend/RecommendClient";
 import AppShell from "@/components/layout/AppShell";
 import JsonLd from "@/components/seo/JsonLd";
@@ -80,26 +80,8 @@ const presets = [
 ];
 
 export default async function RecommendPage() {
-  const all = await getAllResources();
-
-  // Prune resources for props size optimization
-  const prunedResources = all.map((r) => ({
-    id: r.id,
-    title: r.title,
-    url: r.url,
-    type: r.type,
-    collection: r.collection,
-    language: r.language,
-    category: r.category,
-    subcategory: r.subcategory || undefined,
-    tags: r.tags,
-    summary: r.summary || undefined,
-    cardSummary: r.cardSummary || undefined,
-    quality: r.quality,
-    difficulty: r.difficulty || undefined,
-    editorNote: r.editorNote || undefined,
-    source: r.source,
-  })) as Resource[];
+  const prunedResources = await getRecommendationResources();
+  const plannerEnabled = Boolean(process.env.NEXT_PUBLIC_AI_PLANNER_URL) || isPlannerConfigured();
 
   // Pre-calculate preset results at build time for ARO/SEO
   const preCalculatedPresets = [];
@@ -187,8 +169,8 @@ export default async function RecommendPage() {
       {/* Render the interactive client page */}
       <Suspense fallback={<div className="font-mono text-sm text-archive-subtle animate-pulse py-8 text-center">Loading shortlist panel...</div>}>
         <RecommendClient 
-          resources={prunedResources}
           presets={preCalculatedPresets}
+          plannerEnabled={plannerEnabled}
         />
       </Suspense>
     </AppShell>

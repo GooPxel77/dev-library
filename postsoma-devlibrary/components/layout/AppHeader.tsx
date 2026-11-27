@@ -53,6 +53,7 @@ export default function AppHeader() {
                   <Link
                     key={link.href}
                     href={link.href}
+                    prefetch={link.href === "/resources" ? false : undefined}
                     aria-current={isActive ? "page" : undefined}
                     className={`px-3 py-1.5 text-sm font-sans rounded-sm transition-all duration-150 flex items-center gap-1.5 border border-transparent ${
                       isActive
@@ -90,6 +91,7 @@ export default function AppHeader() {
             <Link
               key={link.href}
               href={link.href}
+              prefetch={link.href === "/resources" ? false : undefined}
               aria-current={isActive ? "page" : undefined}
               className={`flex flex-col items-center justify-center flex-1 h-full py-1.5 transition-all duration-150 active:scale-95 ${
                 isActive

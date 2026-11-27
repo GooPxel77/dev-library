@@ -20,7 +20,7 @@ export default function RedirectClient({ slug }: RedirectClientProps) {
 
   return (
     <div className="min-h-screen bg-archive-bg flex items-center justify-center font-mono text-xs text-archive-subtle">
-      Redirecting to recommendation engine...
+      正在打开对应的学习推荐…
     </div>
   );
 }

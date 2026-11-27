@@ -16,25 +16,25 @@ const HEALTH_META: Record<
     label: "活跃",
     description: "近期有更新",
     dotClassName: "bg-emerald-500/60",
-    textClassName: "text-archive-subtle/70",
+    textClassName: "text-archive-subtle",
   },
   quiet: {
     label: "近期较少更新",
     description: "在设定的时间内没有推送",
     dotClassName: "bg-amber-500/50",
-    textClassName: "text-archive-subtle/60",
+    textClassName: "text-archive-subtle",
   },
   archived: {
     label: "已归档",
     description: "项目已由所有者归档",
     dotClassName: "bg-archive-subtle/40",
-    textClassName: "text-archive-subtle/50",
+    textClassName: "text-archive-subtle",
   },
   unavailable: {
     label: "不可访问",
     description: "项目已停用或无法访问",
     dotClassName: "bg-rose-500/40",
-    textClassName: "text-archive-subtle/50",
+    textClassName: "text-archive-subtle",
   },
 };
 
@@ -75,7 +75,7 @@ export function GitHubHealthBadge({
       "尚未检查：暂无经过核实的更新状态。";
     return (
       <span
-        className="inline-flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-wide text-archive-subtle/70"
+        className="inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-wide text-archive-subtle"
         title={accessibleLabel}
         aria-label={`项目状态：${accessibleLabel}`}
       >
@@ -94,7 +94,7 @@ export function GitHubHealthBadge({
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-wide ${meta.textClassName}`}
+      className={`inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-wide ${meta.textClassName}`}
       title={accessibleLabel}
       aria-label={`项目状态：${accessibleLabel}`}
     >
@@ -119,7 +119,7 @@ export function GitHubCapabilityTags({
 
   if (capabilities.length === 0) {
     return (
-      <span className="font-mono text-[9px] text-archive-subtle/45">
+      <span className="font-mono text-[11px] text-archive-subtle">
         暂无能力标签
       </span>
     );
@@ -130,13 +130,13 @@ export function GitHubCapabilityTags({
       {visible.map((capability) => (
         <span
           key={capability}
-          className="font-mono text-[9px] leading-none px-2 py-1 rounded-full border border-archive-border/80 bg-archive-bg/50 text-archive-subtle"
+          className="font-mono text-[11px] leading-none px-2 py-1 rounded-full border border-archive-border/80 bg-archive-bg/50 text-archive-subtle"
         >
           {capability}
         </span>
       ))}
       {remaining > 0 && (
-        <span className="font-mono text-[9px] text-archive-subtle/55">
+        <span className="font-mono text-[11px] text-archive-subtle">
           +{remaining}
         </span>
       )}
@@ -152,7 +152,7 @@ export function GitHubResearchDetails({
   return (
     <div className="space-y-4">
       <section className="bg-archive-bg/40 p-4 border border-archive-border rounded-sm relative overflow-hidden">
-        <h3 className="font-mono text-[9px] uppercase tracking-widest text-archive-subtle mb-2">
+        <h3 className="font-mono text-[11px] uppercase tracking-widest text-archive-subtle mb-2">
           项目简介
         </h3>
         <p className="font-sans text-xs sm:text-sm text-archive-subtle leading-relaxed">
@@ -164,7 +164,7 @@ export function GitHubResearchDetails({
 
       {favorite.whySaved && (
         <section className="border-t border-archive-border/50 pt-3">
-          <h3 className="font-mono text-[9px] uppercase tracking-widest text-archive-subtle mb-1.5">
+          <h3 className="font-mono text-[11px] uppercase tracking-widest text-archive-subtle mb-1.5">
             收藏理由
           </h3>
           <p className="font-sans text-xs text-archive-text/85 leading-relaxed">
@@ -174,14 +174,14 @@ export function GitHubResearchDetails({
       )}
 
       <section className="border-t border-archive-border/50 pt-3">
-        <h3 className="font-mono text-[9px] uppercase tracking-widest text-archive-subtle mb-1.5">
+        <h3 className="font-mono text-[11px] uppercase tracking-widest text-archive-subtle mb-1.5">
           个人笔记
         </h3>
         <p
           className={`font-sans text-xs leading-relaxed ${
             favorite.personalNote
               ? "text-archive-text/85"
-              : "text-archive-subtle/50 italic"
+              : "text-archive-subtle italic"
           }`}
         >
           {favorite.personalNote || "暂无个人笔记。"}

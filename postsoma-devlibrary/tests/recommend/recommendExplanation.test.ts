@@ -38,3 +38,24 @@ describe("short programming language queries", () => {
     expect(result.picks.map((pick) => pick.resourceId).sort()).toEqual(["go", "golang"]);
   });
 });
+
+describe("bilingual learning goals", () => {
+  const base = {
+    url: "https://example.com", collection: "books", quality: "standard",
+    source: "free-programming-books", sourcePath: "books", updatedAt: "2026-01-01",
+  } as const;
+  const catalog: Resource[] = [
+    { ...base, id: "python", title: "Learn Python", language: "en", category: "Programming", tags: [], type: "book" },
+    { ...base, id: "ml", title: "Machine Learning", language: "en", category: "AI", tags: [], type: "course" },
+    { ...base, id: "zh", title: "机器学习入门", language: "zh", category: "AI", tags: [], type: "book" },
+  ];
+  it.each(["我想學Python", "我想学 Python", "我想学习Ｐｙｔｈｏｎ"])("recognizes the technical name in %s", async (goal) => {
+    const result = await matchAndRecommend(catalog, { goal, language: "all", difficulty: "all", format: "all" });
+    expect(result.picks.map((pick) => pick.resourceId)).toEqual(["python"]);
+  });
+  it("expands a traditional Chinese topic while respecting the selected language", async () => {
+    const result = await matchAndRecommend(catalog, { goal: "我想學機器學習", language: "en", difficulty: "all", format: "all" });
+    expect(result.picks.map((pick) => pick.resourceId)).toEqual(["ml"]);
+    expect(result.picks[0].matchEvidence).toBe("标题匹配 · Machine Learning");
+  });
+});

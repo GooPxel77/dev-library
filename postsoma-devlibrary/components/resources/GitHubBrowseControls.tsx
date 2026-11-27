@@ -54,14 +54,14 @@ function HealthSegmentedControl({
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-center justify-between">
-        <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-archive-subtle">
+        <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-archive-subtle">
           更新状态
         </span>
         {selectedHealth && (
           <button
             type="button"
             onClick={() => onHealthChange("")}
-            className="font-mono text-[10px] text-teal-400 hover:text-teal-300 transition-colors cursor-pointer"
+            className="font-mono text-[11px] text-teal-400 hover:text-teal-300 transition-colors cursor-pointer"
           >
             清除
           </button>
@@ -90,7 +90,7 @@ function HealthSegmentedControl({
               }`}
             >
               <span className="text-[11px] sm:text-xs">{label}</span>
-              <span className="text-[10px] opacity-75 tabular-nums">
+              <span className="text-[11px] tabular-nums">
                 {count.toLocaleString()}
               </span>
             </button>
@@ -157,14 +157,14 @@ function GitHubFacetChipSection({
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-center justify-between gap-2">
-        <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-archive-subtle">
+        <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-archive-subtle">
           {title}
         </span>
         {selectedValue && (
           <button
             type="button"
             onClick={() => onChange("")}
-            className="font-mono text-[10px] text-teal-400 hover:text-teal-300 transition-colors cursor-pointer"
+            className="font-mono text-[11px] text-teal-400 hover:text-teal-300 transition-colors cursor-pointer"
           >
             清除
           </button>
@@ -194,7 +194,7 @@ function GitHubFacetChipSection({
                   ×
                 </span>
               ) : (
-                <span className="font-mono text-[10px] opacity-60 tabular-nums">
+                <span className="font-mono text-[11px] tabular-nums">
                   {option.count}
                 </span>
               )}
@@ -211,7 +211,7 @@ function GitHubFacetChipSection({
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder={placeholder}
-          className="w-full bg-archive-bg/90 border border-archive-border/70 rounded px-2.5 py-1.5 text-xs text-archive-text font-sans placeholder:text-archive-subtle/50 focus:outline-none focus:border-teal-500/60 transition-colors"
+          className="w-full bg-archive-bg/90 border border-archive-border/70 rounded px-2.5 py-1.5 text-xs text-archive-text font-sans placeholder:text-archive-subtle focus:outline-none focus:border-teal-500/60 transition-colors"
         />
         {search && (
           <button
@@ -229,7 +229,7 @@ function GitHubFacetChipSection({
       {search.trim() && (
         <div className="max-h-48 overflow-y-auto drawer-scroll rounded border border-archive-border/80 bg-archive-bg/95 p-1 space-y-0.5 shadow-lg">
           {filteredOptions.length === 0 ? (
-            <div className="py-2.5 text-center font-mono text-[11px] text-archive-subtle/60">
+            <div className="py-2.5 text-center font-mono text-[11px] text-archive-subtle">
               没有匹配的选项
             </div>
           ) : (
@@ -251,7 +251,7 @@ function GitHubFacetChipSection({
                   }`}
                 >
                   <span className="truncate mr-2">{option.label}</span>
-                  <span className="font-mono text-[10px] tabular-nums shrink-0 opacity-60">
+                  <span className="font-mono text-[11px] tabular-nums shrink-0">
                     {option.count}
                   </span>
                 </button>
@@ -291,7 +291,7 @@ export default function GitHubBrowseControls({
           className="rounded border border-amber-400/20 bg-amber-400/[0.04] px-3.5 py-2.5"
           aria-label="收藏时间说明"
         >
-          <p className="font-mono text-[9px] uppercase tracking-widest text-amber-200/85 font-medium">
+          <p className="font-mono text-[11px] uppercase tracking-widest text-amber-200/85 font-medium">
             {hasTrustedTimeline
               ? "收藏时间信息"
               : "收藏时间暂不可用"}

@@ -42,21 +42,21 @@ export default function RelatedResourceSection({
             className="group rounded-sm border border-archive-border/70 bg-archive-bg/45 p-3 transition-colors hover:border-teal-500/35 hover:bg-teal-500/[0.035]"
           >
             <div className="mb-1.5 flex items-center gap-2">
-              <span className="font-mono text-[8px] uppercase tracking-widest text-teal-300/70">
+              <span className="font-mono text-[11px] uppercase tracking-widest text-teal-300/70">
                 {resource.collection === "github"
                   ? "GitHub 项目"
                   : resource.collection === "courses"
                     ? "课程"
                     : "书籍"}
               </span>
-              <span className="ml-auto font-mono text-[9px] text-archive-subtle/40 transition-colors group-hover:text-teal-300/70">
+              <span className="ml-auto font-mono text-[11px] text-archive-subtle transition-colors group-hover:text-teal-300/70">
                 查看 →
               </span>
             </div>
             <h3 className="font-sans text-sm font-semibold leading-snug text-archive-text transition-colors group-hover:text-teal-200">
               {resource.title}
             </h3>
-            <p className="mt-1.5 line-clamp-2 font-sans text-[11px] leading-relaxed text-archive-subtle/75">
+            <p className="mt-1.5 line-clamp-2 font-sans text-[11px] leading-relaxed text-archive-subtle">
               {note}
             </p>
             {resource.tags.length > 0 && (
@@ -64,7 +64,7 @@ export default function RelatedResourceSection({
                 {resource.tags.slice(0, 3).map((tag) => (
                   <span
                     key={tag}
-                    className="rounded-full border border-archive-border/55 px-1.5 py-0.5 font-mono text-[8px] text-archive-subtle/60"
+                    className="rounded-full border border-archive-border/55 px-1.5 py-0.5 font-mono text-[11px] text-archive-subtle"
                   >
                     {tag}
                   </span>

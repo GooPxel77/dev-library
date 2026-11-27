@@ -52,7 +52,7 @@ function LanguageSegmentedControl({
       <div className="mb-2 flex items-center justify-between">
         <h3
           id="language-label"
-          className="font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-archive-subtle"
+          className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-archive-subtle"
         >
           语言
         </h3>
@@ -70,7 +70,7 @@ function LanguageSegmentedControl({
           }`}
         >
           <span>全部</span>
-          <span className="text-[10px] opacity-75 tabular-nums">
+          <span className="text-[11px] tabular-nums">
             {allCount > 0 ? allCount.toLocaleString() : "—"}
           </span>
         </button>
@@ -90,7 +90,7 @@ function LanguageSegmentedControl({
           }`}
         >
           <span>中文</span>
-          <span className="text-[10px] opacity-75 tabular-nums">
+          <span className="text-[11px] tabular-nums">
             {zhCount.toLocaleString()}
           </span>
         </button>
@@ -110,7 +110,7 @@ function LanguageSegmentedControl({
           }`}
         >
           <span>EN</span>
-          <span className="text-[10px] opacity-75 tabular-nums">
+          <span className="text-[11px] tabular-nums">
             {enCount.toLocaleString()}
           </span>
         </button>
@@ -175,12 +175,12 @@ function SubcategorySection({
       <div className="mb-2.5 flex items-center justify-between gap-3">
         <h3
           id="subcategory-label"
-          className="font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-archive-subtle"
+          className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-archive-subtle"
         >
           分类
         </h3>
         {selected.length > 0 && (
-          <span className="rounded-full border border-archive-accent-dim/40 bg-archive-accent/10 px-1.5 py-0.5 font-mono text-[9px] text-archive-accent">
+          <span className="rounded-full border border-archive-accent-dim/40 bg-archive-accent/10 px-1.5 py-0.5 font-mono text-[11px] text-archive-accent">
             {selected.length}
           </span>
         )}
@@ -208,7 +208,7 @@ function SubcategorySection({
               {isSelected ? (
                 <span className="font-mono text-xs font-bold ml-0.5 opacity-80">×</span>
               ) : (
-                <span className="font-mono text-[10px] opacity-60 tabular-nums">
+                <span className="font-mono text-[11px] tabular-nums">
                   {option.count}
                 </span>
               )}
@@ -225,7 +225,7 @@ function SubcategorySection({
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder={`搜索 ${options.length} 个分类…`}
-          className="w-full bg-archive-bg/90 border border-archive-border/70 rounded px-2.5 py-1.5 text-xs text-archive-text font-sans placeholder:text-archive-subtle/50 focus:outline-none focus:border-archive-accent transition-colors"
+          className="w-full bg-archive-bg/90 border border-archive-border/70 rounded px-2.5 py-1.5 text-xs text-archive-text font-sans placeholder:text-archive-subtle focus:outline-none focus:border-archive-accent transition-colors"
         />
         {search && (
           <button
@@ -243,7 +243,7 @@ function SubcategorySection({
       {search.trim() ? (
         <div className="mt-1.5 max-h-48 overflow-y-auto drawer-scroll rounded border border-archive-border/80 bg-archive-bg/95 p-1 space-y-0.5">
           {filteredOptions.length === 0 ? (
-            <div className="py-3 text-center font-mono text-[11px] text-archive-subtle/60">
+            <div className="py-3 text-center font-mono text-[11px] text-archive-subtle">
               没有匹配的分类
             </div>
           ) : (
@@ -264,7 +264,7 @@ function SubcategorySection({
                   }`}
                 >
                   <span className="truncate mr-2">{label}</span>
-                  <span className="font-mono text-[10px] tabular-nums shrink-0 opacity-60">
+                  <span className="font-mono text-[11px] tabular-nums shrink-0">
                     {option.count}
                   </span>
                 </button>
@@ -278,7 +278,7 @@ function SubcategorySection({
           <button
             type="button"
             onClick={() => setShowAllList((prev) => !prev)}
-            className="font-mono text-[10px] text-archive-accent-dim hover:text-archive-accent hover:underline py-0.5 cursor-pointer"
+            className="font-mono text-[11px] text-archive-accent-dim hover:text-archive-accent hover:underline py-0.5 cursor-pointer"
           >
             {showAllList ? "收起 ▲" : `查看全部（${options.length}） ▾`}
           </button>
@@ -305,7 +305,7 @@ function SubcategorySection({
                 }`}
               >
                 <span className="truncate mr-2">{label}</span>
-                <span className="font-mono text-[10px] tabular-nums shrink-0 opacity-60">
+                <span className="font-mono text-[11px] tabular-nums shrink-0">
                   {option.count}
                 </span>
               </button>
@@ -341,12 +341,12 @@ function TopicSection({
       <div className="mb-2.5 flex items-center justify-between gap-3">
         <h3
           id="topic-label"
-          className="font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-archive-subtle"
+          className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-archive-subtle"
         >
           主题
         </h3>
         {selected.length > 0 && (
-          <span className="rounded-full border border-archive-accent-dim/40 bg-archive-accent/10 px-1.5 py-0.5 font-mono text-[9px] text-archive-accent">
+          <span className="rounded-full border border-archive-accent-dim/40 bg-archive-accent/10 px-1.5 py-0.5 font-mono text-[11px] text-archive-accent">
             {selected.length}
           </span>
         )}
@@ -374,7 +374,7 @@ function TopicSection({
               <div className="flex w-full items-center gap-2">
                 <span
                   aria-hidden="true"
-                  className={`flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-[3px] border text-[9px] transition-colors duration-150 ${
+                  className={`flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-[3px] border text-[11px] transition-colors duration-150 ${
                     isSelected
                       ? "border-archive-accent bg-archive-accent text-archive-bg"
                       : "border-archive-subtle/70 bg-archive-bg/40 text-transparent group-hover:border-archive-accent-dim group-hover:bg-archive-accent/[0.04]"
@@ -393,10 +393,10 @@ function TopicSection({
 
                 {/* Count */}
                 <span
-                  className={`shrink-0 font-mono text-[10px] tabular-nums transition-colors duration-150 ${
+                  className={`shrink-0 font-mono text-[11px] tabular-nums transition-colors duration-150 ${
                     isSelected
                       ? "text-archive-accent/90 font-medium"
-                      : "text-archive-subtle/70 group-hover:text-archive-text/70"
+                      : "text-archive-subtle group-hover:text-archive-text/70"
                   }`}
                 >
                   {option.count.toLocaleString()}
@@ -451,13 +451,13 @@ function FormatSection({
     return (
       <section aria-labelledby="format-label" className="border-b border-archive-border/50 py-3 last:border-b-0">
         <div className="flex items-center justify-between text-xs text-archive-subtle">
-          <span className="font-mono text-[10px] text-archive-subtle/80">
+          <span className="font-mono text-[11px] text-archive-subtle/80">
             资源类型：{topPct}% {TYPE_LABELS[topOption.value] || humanizeId(topOption.value)}
           </span>
           <button
             type="button"
             onClick={() => setExpanded(true)}
-            className="font-mono text-[10px] text-archive-accent-dim hover:text-archive-accent hover:underline py-0.5 cursor-pointer"
+            className="font-mono text-[11px] text-archive-accent-dim hover:text-archive-accent hover:underline py-0.5 cursor-pointer"
           >
             展开 ▾
           </button>
@@ -472,7 +472,7 @@ function FormatSection({
         <div className="flex items-center gap-2">
           <h3
             id="format-label"
-            className="font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-archive-subtle"
+            className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-archive-subtle"
           >
             资源类型
           </h3>
@@ -480,14 +480,14 @@ function FormatSection({
             <button
               type="button"
               onClick={() => setExpanded(false)}
-              className="font-mono text-[9px] text-archive-subtle hover:text-archive-text underline cursor-pointer"
+              className="font-mono text-[11px] text-archive-subtle hover:text-archive-text underline cursor-pointer"
             >
               收起
             </button>
           )}
         </div>
         {selected.length > 0 && (
-          <span className="rounded-full border border-archive-accent-dim/40 bg-archive-accent/10 px-1.5 py-0.5 font-mono text-[9px] text-archive-accent">
+          <span className="rounded-full border border-archive-accent-dim/40 bg-archive-accent/10 px-1.5 py-0.5 font-mono text-[11px] text-archive-accent">
             {selected.length}
           </span>
         )}
@@ -513,7 +513,7 @@ function FormatSection({
             >
               <span
                 aria-hidden="true"
-                className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-[3px] border text-[10px] transition-colors duration-150 ${
+                className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-[3px] border text-[11px] transition-colors duration-150 ${
                   isSelected
                     ? "border-archive-accent bg-archive-accent text-archive-bg"
                     : "border-archive-subtle/70 bg-archive-bg/40 text-transparent group-hover:border-archive-accent-dim group-hover:bg-archive-accent/[0.04]"
@@ -532,10 +532,10 @@ function FormatSection({
 
               {/* Count */}
               <span
-                className={`shrink-0 font-mono text-[10px] tabular-nums transition-colors duration-150 ${
+                className={`shrink-0 font-mono text-[11px] tabular-nums transition-colors duration-150 ${
                   isSelected
                     ? "text-archive-accent/90 font-medium"
-                    : "text-archive-subtle/70 group-hover:text-archive-text/70"
+                    : "text-archive-subtle group-hover:text-archive-text/70"
                 }`}
               >
                 {option.count.toLocaleString()}
@@ -596,10 +596,8 @@ export default function ResourceFacetPanel({
         {/* Header with clear */}
         {!compact && <div className="mb-3.5 flex items-start justify-between gap-3 border-b border-archive-border/50 pb-3">
           <div>
-            <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-archive-accent">
-              筛选条件
-            </p>
-            <p className="mt-0.5 font-mono text-[10px] text-archive-subtle/70">
+            <h2 className="text-sm font-semibold text-archive-text">筛选条件</h2>
+            <p className="mt-0.5 font-mono text-[11px] text-archive-subtle">
               {selectedCount > 0 ? `已选择 ${selectedCount} 项` : "结果随筛选条件更新"}
             </p>
           </div>
@@ -607,7 +605,7 @@ export default function ResourceFacetPanel({
             <button
               type="button"
               onClick={onClear}
-              className="min-h-7 shrink-0 cursor-pointer font-mono text-[10px] text-archive-accent hover:text-archive-accent-glow hover:underline transition-colors"
+              className="min-h-7 shrink-0 cursor-pointer font-mono text-[11px] text-archive-accent hover:text-archive-accent-glow hover:underline transition-colors"
             >
               清除筛选
             </button>

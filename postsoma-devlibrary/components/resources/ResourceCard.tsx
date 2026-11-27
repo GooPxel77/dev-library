@@ -7,15 +7,17 @@ import { TYPE_LABELS, getResourceDomain } from "@/lib/utils/resource";
 import { GitHubHealthBadge } from "./GitHubFavoriteMeta";
 import { getPrimaryCapability } from "@/lib/data/github-search";
 
-interface ResourceCardProps {
-  resource: Resource;
+type CardData = Pick<Resource, "id" | "title" | "url" | "language" | "type" | "facet">;
+
+interface ResourceCardProps<T extends CardData> {
+  resource: T;
   language?: "all" | "zh" | "en";
-  onPreview?: (resource: Resource) => void;
+  onPreview?: (resource: T) => void;
   githubFavorite?: GitHubFavorite;
   capabilityFrequency?: ReadonlyMap<string, number>;
 }
 
-export default function ResourceCard({ resource, onPreview, githubFavorite, capabilityFrequency }: ResourceCardProps) {
+export default function ResourceCard<T extends CardData>({ resource, onPreview, githubFavorite, capabilityFrequency }: ResourceCardProps<T>) {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const params = new URLSearchParams(searchParams?.toString());
