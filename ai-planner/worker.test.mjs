@@ -6,19 +6,24 @@ import { Miniflare } from "miniflare";
 
 const origin = "https://www.205022.xyz";
 const criteria = { goal: "Python", format: "all", difficulty: "beginner", language: "zh", titles: ["Python 入门"] };
+const bindings = {
+  SITE_ORIGIN: origin, AI_MODEL: "custom-model", AI_API_URL: "https://provider.example/custom/chat/completions", AI_API_KEY: "fixture",
+};
 let calls = 0;
 const runtime = new Miniflare({
   modules: true,
   scriptPath: fileURLToPath(new URL("./worker.mjs", import.meta.url)),
   compatibilityDate: "2026-03-01",
   durableObjects: { QUOTAS: { className: "DailyQuota", useSQLite: true } },
-  bindings: { SITE_ORIGIN: origin, MODEL: "test-model", GEMINI_API_KEY: "test-only" },
+  bindings,
   outboundService: async request => {
     calls++;
-    assert.equal(request.headers.get("x-goog-api-key"), "test-only");
+    assert.equal(request.url, bindings.AI_API_URL);
+    assert.equal(request.headers.get("Authorization"), `Bearer ${bindings.AI_API_KEY}`);
     const body = await request.json();
-    if (body.contents[0].parts[0].text.includes("test-failure")) return new Response(null, { status: 503 });
-    return Response.json({ candidates: [{ content: { parts: [{ text: "第一天：完成入门练习。" }] } }] });
+    assert.equal(body.model, bindings.AI_MODEL);
+    if (body.messages[1].content.includes("test-failure")) return new Response(null, { status: 503 });
+    return Response.json({ choices: [{ message: { content: "第一天：完成入门练习。" } }] });
   },
 });
 after(() => runtime.dispose());
@@ -61,9 +66,8 @@ test("rejected input and preflight do not spend a slot; attempted model calls do
   assert.equal((await success.json()).remaining, 8);
 });
 
-test("a full counter from yesterday allows today's first Workers AI call", async () => {
+test("a full counter from yesterday allows today's first model call", async () => {
   const source = await readFile(new URL("./worker.mjs", import.meta.url), "utf8");
-  const model = "@cf/meta/llama-3.3-70b-instruct-fp8-fast";
   const local = new Miniflare({
     compatibilityDate: "2026-03-01",
     modules: [
@@ -79,26 +83,30 @@ test("a full counter from yesterday allows today's first Workers AI call", async
               await counter.expireDay();
               return new Response(null);
             }
-            const AI = { run: async (id, input) => ({ response: id + "/" + input.messages.length }) };
-            return planner.fetch(request, { ...env, AI });
+            if (new URL(request.url).searchParams.has("unconfigured")) {
+              return planner.fetch(request, { ...env, AI_API_KEY: "" });
+            }
+            return planner.fetch(request, env);
           }
         };` },
       { type: "ESModule", path: "worker.mjs", contents: source },
     ],
     durableObjects: { QUOTAS: { className: "FixtureQuota", useSQLite: true } },
-    bindings: { SITE_ORIGIN: origin, MODEL: model },
+    bindings,
+    outboundService: async () => Response.json({ choices: [{ message: { content: "Day one" } }] }),
   });
-  const call = () => local.dispatchFetch("https://planner.test/plan", {
+  const call = (query = "") => local.dispatchFetch(`https://planner.test/plan${query}`, {
     method: "POST", headers: { Origin: origin, "CF-Connecting-IP": "192.0.2.9", "Content-Type": "application/json" },
     body: JSON.stringify(criteria),
   });
   try {
+    assert.equal((await call("?unconfigured")).status, 503);
     for (let i = 0; i < 10; i++) assert.equal((await call()).status, 200);
     assert.equal((await call()).status, 429);
     await local.dispatchFetch("https://planner.test/advance-day");
     const { remaining, plan } = await (await call()).json();
     assert.equal(remaining, 9);
-    assert.equal(plan, `${model}/2`);
+    assert.equal(plan, "Day one");
   } finally {
     await local.dispose();
   }

@@ -57,28 +57,30 @@ async function readCriteria(request) {
   return { goal: data.goal.trim(), difficulty: data.difficulty, language: data.language, format: data.format, titles: data.titles };
 }
 
-async function generate(env, criteria) {
-  const content = JSON.stringify(criteria);
-  if (env.MODEL.startsWith("@cf/")) {
-    const result = await env.AI.run(env.MODEL, {
-      messages: [{ role: "system", content: SYSTEM_PROMPT }, { role: "user", content }],
-      max_tokens: 850,
-    });
-    return result.response;
-  }
-  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(env.MODEL)}:generateContent`, {
+function providerConfig(env) {
+  const url = URL.canParse(env.AI_API_URL) ? new URL(env.AI_API_URL) : null;
+  const key = env.AI_API_KEY?.trim();
+  const model = env.AI_MODEL?.trim();
+  if (url?.protocol !== "https:" || url.username || url.password || !key || !model) return null;
+  return { url, key, model };
+}
+
+async function generate(provider, criteria) {
+  const response = await fetch(provider.url, {
     method: "POST",
-    headers: { "Content-Type": "application/json", "x-goog-api-key": env.GEMINI_API_KEY },
+    redirect: "manual",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${provider.key}` },
     body: JSON.stringify({
-      systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
-      contents: [{ role: "user", parts: [{ text: content }] }],
-      generationConfig: { maxOutputTokens: 1200 },
+      model: provider.model,
+      messages: [{ role: "system", content: SYSTEM_PROMPT }, { role: "user", content: JSON.stringify(criteria) }],
+      max_tokens: 1200,
+      stream: false,
     }),
     signal: AbortSignal.timeout(30000),
   });
   if (!response.ok) throw new Error("Model unavailable");
   const result = await response.json();
-  return result.candidates?.[0]?.content?.parts?.filter(part => !part.thought).map(part => part.text).join("");
+  return result.choices?.[0]?.message?.content;
 }
 
 export default {
@@ -96,7 +98,8 @@ export default {
     if (request.method !== "POST") return reply({}, 405);
     if (request.headers.get("Content-Type")?.split(";")[0].trim() !== "application/json") return reply({}, 415);
     const ip = request.headers.get("CF-Connecting-IP");
-    if (!ip || !env.MODEL || !(env.MODEL.startsWith("@cf/") ? env.AI : env.GEMINI_API_KEY)) return reply({}, 503);
+    const provider = providerConfig(env);
+    if (!ip || !provider) return reply({}, 503);
     const criteria = await readCriteria(request).catch(() => null);
     if (!criteria) return reply({ error: "invalid_input" }, 400);
     let quota;
@@ -112,7 +115,7 @@ export default {
       return reply({ error: "daily_limit", remaining, resetAt }, 429);
     }
     try {
-      const plan = await generate(env, criteria);
+      const plan = await generate(provider, criteria);
       if (typeof plan !== "string" || !plan.trim()) throw new Error("Empty plan");
       return reply({ plan: plan.trim(), remaining, resetAt });
     } catch {

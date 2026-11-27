@@ -6,10 +6,8 @@
   "workers_dev": true,
   "preview_urls": false,
   "vars": {
-    "SITE_ORIGIN": "https://www.205022.xyz",
-    "MODEL": "@cf/meta/llama-3.3-70b-instruct-fp8-fast"
+    "SITE_ORIGIN": "https://www.205022.xyz"
   },
-  "ai": { "binding": "AI" },
   "durable_objects": {
     "bindings": [{ "name": "QUOTAS", "class_name": "DailyQuota" }]
   },
