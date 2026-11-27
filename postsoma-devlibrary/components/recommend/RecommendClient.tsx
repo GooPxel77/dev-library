@@ -7,6 +7,7 @@ import { matchAndRecommend } from "@/lib/data/recommend";
 import type { RecommendationResult } from "@/lib/data/recommend";
 import type { Resource, Difficulty } from "@/lib/types/resource";
 import Icon from "@/components/ui/Icon";
+import HostedPlan from "./HostedPlan";
 import { buildRecommendationPrompt } from "@/lib/data/recommend-prompt";
 import { TYPE_LABELS } from "@/lib/utils/resource";
 import { getResourceDomain } from "@/lib/utils/resource";
@@ -370,6 +371,11 @@ export default function RecommendClient({ resources, presets }: RecommendClientP
                   ))}
                 </div>
               )}
+              {result.picks.length > 0 && <HostedPlan
+                key={JSON.stringify([queryGoal, queryLevel, queryLang, queryFormat])}
+                criteria={{ goal: queryGoal, difficulty: queryLevel, language: queryLang, format: queryFormat }}
+                picks={result.picks}
+              />}
               {/* Share & AI instructions box */}
               {result.picks.length > 0 && <div className="bg-archive-bg border border-teal-500/25 p-4 rounded-sm space-y-3">
                 <div className="flex items-start justify-between gap-4 flex-wrap sm:flex-nowrap">

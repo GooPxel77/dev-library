@@ -1,0 +1,14 @@
+{
+  "name": "postsoma-devlibrary-planner",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "test": "node --test worker.test.mjs",
+    "deploy": "wrangler deploy"
+  },
+  "devDependencies": {
+    "miniflare": "4.20260426.0",
+    "wrangler": "4.86.0"
+  }
+}

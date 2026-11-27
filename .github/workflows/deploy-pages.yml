@@ -46,6 +46,7 @@ jobs:
       - name: Build static site
         run: npm run build
         env:
+          NEXT_PUBLIC_AI_PLANNER_URL: ${{ vars.NEXT_PUBLIC_AI_PLANNER_URL }}
           NEXT_PUBLIC_GA_ROLLUP_ID: ${{ vars.NEXT_PUBLIC_GA_ROLLUP_ID || 'G-NZ2V582QTN' }}
           NEXT_PUBLIC_GA_PROJECT_ID: ${{ vars.NEXT_PUBLIC_GA_PROJECT_ID || 'G-DDSKE86NG1' }}
           NEXT_PUBLIC_GA_PROJECT_NAME: ${{ vars.NEXT_PUBLIC_GA_PROJECT_NAME || 'dev_library' }}

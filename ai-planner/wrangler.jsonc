@@ -1,0 +1,17 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "postsoma-devlibrary-planner",
+  "main": "worker.mjs",
+  "compatibility_date": "2026-03-01",
+  "workers_dev": true,
+  "preview_urls": false,
+  "vars": {
+    "SITE_ORIGIN": "https://www.205022.xyz",
+    "MODEL": "@cf/meta/llama-3.1-8b-instruct-fp8-fast"
+  },
+  "ai": { "binding": "AI" },
+  "durable_objects": {
+    "bindings": [{ "name": "QUOTAS", "class_name": "DailyQuota" }]
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["DailyQuota"] }]
+}
